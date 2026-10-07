@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Host Demo</title>
+<meta name="description" content="A demo AI assistant that answers guests, books tables and takes takeaway orders in Danish and English.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1C1424; --bg2:#2A1E36; --ink:#F6EFE6; --muted:#BFB2C9;
+  --saffron:#F2A900; --saffron-ink:#2A1E00; --chili:#D9534F;
+  --card:#FBF7F2; --card-ink:#231A2C; --card-muted:#6E6278; --line:#E6DDD3;
+  --bubble-bot:#FFFFFF; --bubble-me:#3B2A4C;
+  --display:"Gloock",Georgia,serif; --body:"Figtree",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(1100px 600px at 80% -10%,#3A2650 0%,transparent 60%),var(--bg);color:var(--ink);font:16px/1.55 var(--body);min-height:100vh;padding:32px 16px 48px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.eyebrow{font:600 12px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--saffron)}
+h1{font:400 clamp(34px,5vw,54px)/1.05 var(--display);margin:12px 0 16px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--saffron)}
+.lead{color:var(--muted);font-size:18px;max-width:52ch;margin:0 0 24px}
+.feats{list-style:none;padding:0;margin:0 0 28px;display:grid;gap:14px}
+.feats li{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start}
+.feats .ic{width:28px;height:28px;border-radius:8px;background:var(--bg2);display:grid;place-items:center;color:var(--saffron);font-weight:700;font-size:14px}
+.feats b{display:block;color:var(--ink);font-weight:600}
+.feats span{color:var(--muted);font-size:15px}
+.by{border-top:1px solid #3A2C48;padding-top:18px;color:var(--muted);font-size:14px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.by strong{color:var(--ink)}
+.try{font-size:14px;color:var(--muted);margin:0 0 10px}
+/* phone */
+.phone{width:100%;max-width:390px;margin:0 auto;background:#0E0A12;border-radius:40px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px #3A2C48}
+.screen{background:var(--card);color:var(--card-ink);border-radius:30px;overflow:hidden;height:min(720px,82vh);display:flex;flex-direction:column}
+.top{background:var(--card-ink);color:#fff;padding:16px 18px 14px;display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:50%;background:var(--saffron);color:var(--saffron-ink);display:grid;place-items:center;font:400 20px var(--display);flex:none}
+.top .nm{font-weight:700;line-height:1.2}
+.top .st{font-size:12px;color:#C9F2D9;display:flex;align-items:center;gap:6px}
+.top .st i{width:7px;height:7px;border-radius:50%;background:#3DDC84;display:inline-block}
+.lang{margin-left:auto;display:flex;background:#3B2F47;border-radius:999px;padding:3px}
+.lang button{border:0;background:transparent;color:#D8CCE3;font:600 12px var(--body);padding:5px 9px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:#fff;color:var(--card-ink)}
+.log{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(#F6F0E8,#FBF7F2)}
+.msg{max-width:84%;padding:10px 13px;border-radius:16px;font-size:15px;line-height:1.45;white-space:pre-line;animation:in .18s ease-out}
+.bot{background:var(--bubble-bot);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.me{background:var(--bubble-me);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+@keyframes in{from{transform:translateY(4px);opacity:.4}to{transform:none;opacity:1}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:100%}
+.chip{border:1px solid var(--card-ink);background:#fff;color:var(--card-ink);font:600 13px var(--body);padding:7px 11px;border-radius:999px;cursor:pointer}
+.chip:hover{background:var(--card-ink);color:#fff}
+.menu{display:grid;gap:8px;align-self:stretch}
+.item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.item .t{font-weight:600;font-size:14px}
+.item .d{grid-column:1;font-size:12.5px;color:var(--card-muted)}
+.item .p{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.tags{grid-column:1;display:flex;gap:4px;margin-top:3px}
+.tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;background:#EFE7DC;color:#6A5641}
+.tag.v{background:#E3F3E6;color:#2B6B3A}.tag.h{background:#FBE4E1;color:#A23A33}
+.add{grid-column:2;grid-row:1/span 3;border:0;background:var(--saffron);color:var(--saffron-ink);font:700 18px var(--body);width:34px;height:34px;border-radius:10px;cursor:pointer}
+.card{background:#fff;border:1px solid var(--line);border-left:4px solid #3DDC84;border-radius:12px;padding:12px 14px;font-size:14px;align-self:stretch}
+.card h4{margin:0 0 6px;font-size:14px}
+.card .row{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.card .tot{border-top:1px dashed var(--line);margin-top:6px;padding-top:6px;font-weight:700}
+.card .note{color:var(--card-muted);font-size:12.5px;margin-top:6px}
+.cartbar{display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--card-ink);color:#fff;padding:9px 14px;font-size:14px}
+.cartbar.on{display:flex}
+.cartbar button{border:0;background:var(--saffron);color:var(--saffron-ink);font:700 13px var(--body);padding:7px 12px;border-radius:999px;cursor:pointer}
+form.inp{display:flex;gap:8px;padding:10px 12px 14px;border-top:1px solid var(--line);background:#fff}
+form.inp input{flex:1;border:1px solid var(--line);border-radius:999px;padding:11px 14px;font:15px var(--body);color:var(--card-ink);background:#FBF7F2;min-width:0}
+form.inp button{border:0;background:var(--card-ink);color:#fff;border-radius:999px;padding:0 16px;font:600 14px var(--body);cursor:pointer}
+.typing{align-self:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 14px;display:flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:#B9AEC4;animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+button:focus-visible,input:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:32px}.phone{order:-1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section>
+    <div class="eyebrow">Demo for <span class="rname">your restaurant</span></div>
+    <h1>An AI host that answers guests <em>while you cook</em></h1>
+    <p class="lead">Guests ask the same questions every evening: are you open, is it spicy, can I book for six, can I pick up at 19:00. This assistant answers them on your website, WhatsApp or Instagram, in Danish and English, day and night.</p>
+    <ul class="feats">
+      <li><span class="ic">1</span><div><b>Books tables</b><span>Takes the booking and sends it to you or your booking system right away. No more missed calls during the rush.</span></div></li>
+      <li><span class="ic">2</span><div><b>Takes takeaway orders directly</b><span>Orders come to you instead of through Wolt or Just Eat, so you keep the commission.</span></div></li>
+      <li><span class="ic">3</span><div><b>Knows your menu</b><span>Answers about spice level, vegetarian dishes, allergens and halal from your real menu.</span></div></li>
+      <li><span class="ic">4</span><div><b>Speaks Danish and English</b><span>Tourists and locals both get answers in their own language.</span></div></li>
+    </ul>
+    <p class="try">Try it: tap a button in the chat or type a question like "is the lamb spicy?" or "bord til 4 i morgen".</p>
+    <div class="by"><span>Built by <strong>Sulaman Khan</strong>, AI engineer</span><span>se.sulaman.khan@gmail.com</span><span>linkedin.com/in/suleman-khan-eng</span></div>
+  </section>
+
+  <div class="phone" aria-label="Chat demo">
+    <div class="screen">
+      <div class="top">
+        <div class="logo" id="logo">S</div>
+        <div><div class="nm rname">Spice Garden</div><div class="st"><i></i><span id="online">Online now</span></div></div>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" id="l-en" aria-pressed="true">EN</button>
+          <button type="button" id="l-da" aria-pressed="false">DA</button>
+        </div>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="cartbar" id="cartbar"><span id="carttxt"></span><button type="button" id="checkout">Checkout</button></div>
+      <form class="inp" id="form"><input id="q" autocomplete="off" placeholder="Ask anything…" aria-label="Message"><button type="submit" id="send">Send</button></form>
+    </div>
+  </div>
+</main>
+
+<script>
+const params=new URLSearchParams(location.search);
+const NAME=(params.get("r")||"").trim().slice(0,40)||"Spice Garden";
+document.querySelectorAll(".rname").forEach(el=>el.textContent=params.get("r")?NAME:(el.closest(".eyebrow")?"your restaurant":NAME));
+document.getElementById("logo").textContent=NAME.charAt(0).toUpperCase();
+document.title=NAME+" AI Host Demo";
+
+const MENU=[
+ {id:"samosa",t:"Vegetable Samosa (2)",d:{en:"Crispy pastry, spiced potato and peas",da:"Sprød dej med krydrede kartofler og ærter"},p:55,v:1,s:1},
+ {id:"tikka",t:"Chicken Tikka Masala",d:{en:"Tandoori chicken in a creamy tomato sauce",da:"Tandoori kylling i cremet tomatsauce"},p:149,s:2,h:1},
+ {id:"butter",t:"Butter Chicken",d:{en:"Mild, buttery and the guests' favourite",da:"Mild, smøragtig og gæsternes favorit"},p:149,s:1,h:1},
+ {id:"lamb",t:"Lamb Rogan Josh",d:{en:"Slow-cooked Kashmiri lamb curry",da:"Langtidsstegt lammekarry fra Kashmir"},p:169,s:3,h:1},
+ {id:"palak",t:"Palak Paneer",d:{en:"Spinach and homemade cheese",da:"Spinat og hjemmelavet ost"},p:139,v:1,s:2},
+ {id:"biryani",t:"Chicken Biryani",d:{en:"Basmati rice, saffron, raita on the side",da:"Basmatiris, safran, raita ved siden af"},p:159,s:2,h:1},
+ {id:"naan",t:"Garlic Naan",d:{en:"From the tandoor oven",da:"Fra tandoor-ovnen"},p:35,v:1,s:1},
+ {id:"lassi",t:"Mango Lassi",d:{en:"Yoghurt and mango",da:"Yoghurt og mango"},p:45,v:1,s:1}
+];
+const L={
+ en:{hi:`Hi! I'm the assistant for ${NAME}. I can show the menu, book a table or take a takeaway order. What would you like?`,
+  q:["See the menu","Book a table","Order takeaway","Opening hours","Vegetarian?","Allergies"],
+  menu:"Here's our menu. Tap + to add a dish to a takeaway order.",
+  hours:"We're open every day 16:00–22:00, and Friday–Saturday until 23:00. The kitchen takes the last order 30 minutes before closing.",
+  veg:"Yes, plenty. Vegetarian dishes: Vegetable Samosa, Palak Paneer, Garlic Naan and Mango Lassi. Most curries can also be made with vegetables instead of meat.",
+  allerg:"Tell me what you're allergic to (for example nuts, gluten or dairy) and I'll tell you which dishes are safe. The kitchen also gets a note with your order.",
+  nuts:"Dishes with nuts: Chicken Tikka Masala and Butter Chicken (cashew in the sauce). Nut-free: Samosa, Lamb Rogan Josh, Palak Paneer, Biryani and Naan. I'll add a nut allergy note for the kitchen.",
+  gluten:"Gluten-free: all curries and the Biryani. Not gluten-free: Samosa and Naan. Ask for rice instead of naan.",
+  spicy:"Spice levels: Butter Chicken is mild 🌶, Tikka Masala and Biryani are medium 🌶🌶, Lamb Rogan Josh is hot 🌶🌶🌶. The kitchen can make any dish milder or hotter.",
+  halal:"Yes, all our meat is halal.",
+  parking:"There's street parking nearby, and the closest metro station is a 4 minute walk.",
+  people:"Lovely! How many guests?",day:"Which day?",time:"What time suits you?",name:"Last step: what name should the booking be under?",
+  days:["Today","Tomorrow","Friday","Saturday"],
+  booked:(n,d,t,nm)=>({h:"Table booked ✓",rows:[["Name",nm],["Guests",n],["When",d+" at "+t],["Ref.","#"+Math.floor(1000+Math.random()*9000)]],note:`${NAME} gets the booking right away by SMS and email. You'll get a reminder 2 hours before.`}),
+  added:t=>`Added ${t}. Anything else? Tap Checkout when you're ready.`,
+  pickup:"When would you like to pick it up?",pick:["In 20 min","18:00","18:30","19:00"],
+  ordered:(items,tot,t)=>({h:"Order sent to the kitchen ✓",rows:items.concat([["Pickup",t]]),total:tot,note:"Paid at pickup or by MobilePay. Ordered directly, so no Wolt fee for the restaurant."}),
+  cart:(n,s)=>`${n} item${n>1?"s":""} · ${s} kr.`,checkout:"Checkout",
+  fallback:"I can help with the menu, bookings, takeaway, opening hours, allergies and spice levels. What would you like to know?",
+  more:"Anything else I can help with?",ph:"Ask anything…",send:"Send",online:"Online now",empty:"Your order is empty. Tap + on a dish first."},
+ da:{hi:`Hej! Jeg er assistenten for ${NAME}. Jeg kan vise menukortet, booke et bord eller tage imod en takeaway-bestilling. Hvad kan jeg hjælpe med?`,
+  q:["Se menukort","Book bord","Bestil takeaway","Åbningstider","Vegetarisk?","Allergier"],
+  menu:"Her er vores menukort. Tryk + for at tilføje en ret til din takeaway.",
+  hours:"Vi har åbent alle dage 16:00–22:00, fredag–lørdag til 23:00. Køkkenet tager sidste bestilling 30 minutter før lukketid.",
+  veg:"Ja, masser. Vegetariske retter: Vegetable Samosa, Palak Paneer, Garlic Naan og Mango Lassi. De fleste karryretter kan også laves med grøntsager i stedet for kød.",
+  allerg:"Fortæl mig hvad du er allergisk over for (f.eks. nødder, gluten eller mælk), så siger jeg hvilke retter du kan spise. Køkkenet får også en note med din bestilling.",
+  nuts:"Retter med nødder: Chicken Tikka Masala og Butter Chicken (cashew i saucen). Uden nødder: Samosa, Lamb Rogan Josh, Palak Paneer, Biryani og Naan. Jeg tilføjer en note om nøddeallergi til køkkenet.",
+  gluten:"Glutenfri: alle karryretter og Biryani. Ikke glutenfri: Samosa og Naan. Bed om ris i stedet for naan.",
+  spicy:"Styrke: Butter Chicken er mild 🌶, Tikka Masala og Biryani er medium 🌶🌶, Lamb Rogan Josh er stærk 🌶🌶🌶. Køkkenet kan gøre alle retter mildere eller stærkere.",
+  halal:"Ja, alt vores kød er halal.",
+  parking:"Der er gadeparkering i nærheden, og nærmeste metrostation ligger 4 minutters gang væk.",
+  people:"Dejligt! Hvor mange gæster?",day:"Hvilken dag?",time:"Hvad tid passer jer?",name:"Sidste trin: hvilket navn skal bordet stå i?",
+  days:["I dag","I morgen","Fredag","Lørdag"],
+  booked:(n,d,t,nm)=>({h:"Bord booket ✓",rows:[["Navn",nm],["Gæster",n],["Hvornår",d+" kl. "+t],["Ref.","#"+Math.floor(1000+Math.random()*9000)]],note:`${NAME} får bookingen med det samme på SMS og mail. Du får en påmindelse 2 timer før.`}),
+  added:t=>`${t} er tilføjet. Andet? Tryk Bestil når du er klar.`,
+  pickup:"Hvornår vil du hente?",pick:["Om 20 min","18:00","18:30","19:00"],
+  ordered:(items,tot,t)=>({h:"Bestilling sendt til køkkenet ✓",rows:items.concat([["Afhentning",t]]),total:tot,note:"Betales ved afhentning eller med MobilePay. Bestilt direkte, så ingen Wolt-gebyr for restauranten."}),
+  cart:(n,s)=>`${n} ${n>1?"varer":"vare"} · ${s} kr.`,checkout:"Bestil",
+  fallback:"Jeg kan hjælpe med menukort, bordbooking, takeaway, åbningstider, allergier og styrke. Hvad vil du vide?",
+  more:"Er der andet jeg kan hjælpe med?",ph:"Spørg om hvad som helst…",send:"Send",online:"Online nu",empty:"Din bestilling er tom. Tryk + på en ret først."}
+};
+let lang="en",cart=[],flow=null;
+const $=id=>document.getElementById(id),log=$("log");
+const T=()=>L[lang];
+function scroll(){log.scrollTop=log.scrollHeight}
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function me(t){log.append(el("div","msg me",t));scroll()}
+function bot(t,after){const ty=el("div","typing");ty.innerHTML="<i></i><i></i><i></i>";log.append(ty);scroll();
+  setTimeout(()=>{ty.remove();log.append(el("div","msg bot",t));if(after)after();scroll()},matchMedia("(prefers-reduced-motion: reduce)").matches?0:550)}
+function chips(list,fn){const c=el("div","chips");list.forEach(x=>{const b=el("button","chip",x);b.type="button";b.onclick=()=>{c.remove();me(x);fn(x)};c.append(b)});log.append(c);scroll()}
+function home(){chips(T().q,pick)}
+function pick(x){const i=T().q.indexOf(x);[showMenu,startBook,showOrder,()=>bot(T().hours,more),()=>bot(T().veg,more),()=>bot(T().allerg)][i]()}
+function more(){setTimeout(()=>{bot(T().more,home)},250)}
+function showMenu(){bot(T().menu,()=>{const m=el("div","menu");MENU.forEach(it=>{const r=el("div","item");
+  r.append(el("div","t",it.t),el("div","d",it.d[lang]));const tg=el("div","tags");tg.append(el("span","tag","🌶".repeat(it.s)));if(it.v)tg.append(el("span","tag v","Veg"));if(it.h)tg.append(el("span","tag h","Halal"));r.append(tg);
+  const p=el("div","p",it.p+" kr.");p.style.gridColumn="2";p.style.gridRow="1";const a=el("button","add","+");a.type="button";a.setAttribute("aria-label","Add "+it.t);a.style.gridRow="2/span 2";
+  a.onclick=()=>{cart.push(it);updCart();bot(T().added(it.t))};r.append(p,a);m.append(r)});log.append(m);scroll()})}
+const showOrder=showMenu;
+function updCart(){const bar=$("cartbar");if(!cart.length){bar.classList.remove("on");return}bar.classList.add("on");$("carttxt").textContent=T().cart(cart.length,cart.reduce((s,x)=>s+x.p,0));$("checkout").textContent=T().checkout}
+$("checkout").onclick=()=>{if(!cart.length){bot(T().empty);return}me(T().checkout);bot(T().pickup,()=>chips(T().pick,t=>{
+  const g={};cart.forEach(x=>{g[x.t]=(g[x.t]||{n:0,p:0});g[x.t].n++;g[x.t].p+=x.p});
+  const rows=Object.entries(g).map(([k,v])=>[v.n+"× "+k,v.p+" kr."]);const tot=cart.reduce((s,x)=>s+x.p,0);
+  card(T().ordered(rows,tot,t));cart=[];updCart();more()}))};
+function startBook(){flow={};bot(T().people,()=>chips(["2","3","4","5","6+"],n=>{flow.n=n;bot(T().day,()=>chips(T().days,d=>{flow.d=d;bot(T().time,()=>chips(["17:30","18:00","18:30","19:00","19:30","20:30"],t=>{flow.t=t;flow.stage="name";bot(T().name)}))}))}))}
+function card(o){const c=el("div","card");c.append(el("h4",null,o.h));o.rows.forEach(([a,b])=>{const r=el("div","row");r.append(el("span",null,a),el("span",null,b));c.append(r)});
+  if(o.total!=null){const r=el("div","row tot");r.append(el("span",null,"Total"),el("span",null,o.total+" kr."));c.append(r)}c.append(el("div","note",o.note));log.append(c);scroll()}
+function answer(q){const s=q.toLowerCase();
+  if(flow&&flow.stage==="name"){const nm=q.trim().slice(0,30);const f=flow;flow=null;setTimeout(()=>{card(T().booked(f.n,f.d,f.t,nm));more()},450);return}
+  if(/\b(bord|book|reserv|table)/.test(s)){
+    const n=s.match(/\b(\d{1,2})\b/);if(n){flow={n:n[1]};bot(T().day,()=>chips(T().days,d=>{flow.d=d;bot(T().time,()=>chips(["17:30","18:00","18:30","19:00","19:30","20:30"],t=>{flow.t=t;flow.stage="name";bot(T().name)}))}))}else startBook();return}
+  if(/takeaway|take away|order|bestil|afhent|pick ?up/.test(s))return showOrder();
+  if(/menu|menukort|dish|ret(ter)?\b|food|mad/.test(s))return showMenu();
+  if(/nut|nød|cashew|peanut/.test(s))return bot(T().nuts,more);
+  if(/gluten|wheat|hvede/.test(s))return bot(T().gluten,more);
+  if(/allerg|dairy|lactose|mælk/.test(s))return bot(T().allerg);
+  if(/spic|hot|chili|stærk|mild/.test(s))return bot(T().spicy,more);
+  if(/veg|vegan|plante/.test(s))return bot(T().veg,more);
+  if(/halal/.test(s))return bot(T().halal,more);
+  if(/open|hour|åben|åbning|close|luk|time/.test(s))return bot(T().hours,more);
+  if(/park|metro|bus|where|hvor|address|adresse/.test(s))return bot(T().parking,more);
+  bot(T().fallback,home)}
+$("form").onsubmit=e=>{e.preventDefault();const v=$("q").value.trim();if(!v)return;$("q").value="";me(v);answer(v)};
+function setLang(l){lang=l;$("l-en").setAttribute("aria-pressed",l==="en");$("l-da").setAttribute("aria-pressed",l==="da");$("q").placeholder=T().ph;$("send").textContent=T().send;$("online").textContent=T().online;updCart();log.innerHTML="";flow=null;bot(T().hi,home)}
+$("l-en").onclick=()=>setLang("en");$("l-da").onclick=()=>setLang("da");
+setLang(params.get("lang")==="da"?"da":"en");
+</script>
+</body>
+</html>
