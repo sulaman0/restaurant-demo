@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zahida · Order online (prototype)</title>
+<meta name="description" content="Prototype for Zahida: online takeaway ordering, group and event requests, and a guest chat assistant.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF6F1; --bg2:#F3ECE5; --card:#FFFFFF; --ink:#303636; --muted:#6E7373; --rule:#7D7878;
+  --pink:#D23F6E; --pink-dark:#B52E5B; --pink-soft:#FBEAF0; --pink-line:#EBB3C6; --pink-light:#F4B6CA; --line:#EADFD8;
+  --ok:#2F7D4F; --ok-bg:#E3F2E8; --warn:#9A5B00; --warn-bg:#FCEFD8; --blue:#2D5F8A; --blue-bg:#E4EEF8;
+  --font:"Almarai",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--font);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--pink)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+
+/* prototype bar */
+.proto{background:var(--bg2);color:var(--ink);font-size:13px;padding:7px 20px;display:flex;gap:8px 18px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.proto .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.proto select,.proto button{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer}
+.proto .staffbtn{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.badge{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;margin-left:6px;padding:0 5px}
+
+/* site header (dark, white logo) */
+.site{background:var(--ink)}
+.site .in{max-width:1200px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;text-decoration:none;color:#fff;letter-spacing:.32em;font-size:20px}
+.logo img{height:38px;width:auto;display:block}
+.nav{display:flex;gap:4px 22px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.nav a,.nav button{background:none;border:0;color:#fff;text-decoration:none;cursor:pointer;padding:6px 0;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.nav .on{color:var(--pink-light);box-shadow:inset 0 -2px 0 var(--pink-light)}
+.nav .book{border:1px solid #fff;border-radius:999px;padding:7px 16px}
+.nav .book:hover{background:#fff;color:var(--ink)}
+
+/* page */
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 120px}
+.kicker{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--pink);font-weight:700}
+h1{font-weight:300;font-size:clamp(30px,4.4vw,46px);line-height:1.1;margin:10px 0 8px;letter-spacing:-.01em}
+h2{font-weight:700;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--pink);margin:0 0 14px}
+.lead{color:var(--muted);margin:0 0 18px;max-width:62ch}
+.status{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:#3DBE74;flex:none}
+.dot.off{background:#E0A030}
+.tabs{display:flex;gap:8px;margin:24px 0 20px;border-bottom:1px solid var(--line)}
+.tab{background:none;border:0;padding:12px 4px;margin-right:18px;font-size:15px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:700;border-color:var(--pink)}
+
+/* order layout */
+.order{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;align-items:center}
+.filters span{font-size:13px;color:var(--muted);margin-right:4px}
+.fchip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer}
+.fchip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.catnav{display:flex;gap:8px 16px;flex-wrap:wrap;margin-bottom:6px}
+.catnav a{font-size:13px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--pink-line)}
+.cat{margin:26px 0 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dish{background:var(--card);border:1px solid var(--pink-line);border-radius:var(--r);padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+.dish .n{font-weight:700;font-size:16px}
+.dish .d{color:var(--muted);font-size:14px;grid-column:1}
+.dish .tags{grid-column:1;display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.dish .p{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dish .act{grid-column:2;grid-row:2/span 2;align-self:end}
+.tg{font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.02em}
+.tg.VE,.tg.V{background:var(--ok-bg);color:var(--ok)}.tg.G{background:var(--warn-bg);color:var(--warn)}.tg.L{background:var(--blue-bg);color:var(--blue)}
+.tg.cv{background:var(--bg2);color:var(--muted);font-weight:400}
+.addbtn{background:var(--pink);color:#fff;border:0;border-radius:999px;padding:7px 16px;font-weight:700;font-size:14px;cursor:pointer}
+.addbtn:hover{background:var(--pink-dark)}
+.step{display:inline-flex;align-items:center;border:1px solid var(--pink);border-radius:999px;overflow:hidden}
+.step button{background:var(--card);border:0;width:32px;height:32px;font-size:18px;color:var(--pink);cursor:pointer}
+.step span{min-width:24px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.legend{font-size:12px;color:var(--muted);margin-top:18px}
+.empty-filter{color:var(--muted);font-size:14px;padding:8px 0}
+
+/* basket */
+.basket{position:sticky;top:16px;background:var(--card);border:1px solid var(--pink-line);border-radius:18px;padding:18px}
+.basket h3{margin:0 0 4px;font-size:18px;font-weight:700}
+.basket .sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+.bl{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.bl .q{display:inline-flex;gap:4px;align-items:center}
+.bl .q button{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px;line-height:1}
+.bl .amt{font-variant-numeric:tabular-nums;min-width:62px;text-align:right}
+.total{display:flex;justify-content:space-between;font-weight:700;font-size:17px;border-top:2px solid var(--ink);padding-top:10px;margin-top:6px}
+.bempty{color:var(--muted);font-size:14px;padding:14px 0;border-top:1px solid var(--line)}
+.field{display:grid;gap:5px;margin-top:12px}
+.field label,.flabel{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);font-size:15px;width:100%}
+.field textarea{resize:vertical;min-height:60px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.segs{display:flex;gap:6px;flex-wrap:wrap}
+.seg{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 12px;cursor:pointer;font-size:14px}
+.seg[aria-pressed="true"]{border-color:var(--pink);background:var(--pink-soft);color:var(--pink-dark);font-weight:700}
+.note{font-size:13px;border-radius:10px;padding:9px 11px;margin-top:10px}
+.note.info{background:var(--bg2);color:var(--ink)}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.ok{background:var(--ok-bg);color:var(--ok)}
+.cta{width:100%;margin-top:14px;background:var(--pink);color:#fff;border:0;border-radius:999px;padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer}
+.cta:hover{background:var(--pink-dark)}
+.cta:disabled{background:#D9CFCB;cursor:not-allowed}
+.err{color:#B3261E;font-size:13px;margin-top:8px;min-height:1em}
+.done .big{font-size:22px;font-weight:700;margin:4px 0}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;margin-top:12px;font-size:14px}
+.mbar{display:none}
+.closex{display:none}
+
+/* groups */
+.groups{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--pink-line);border-radius:18px;padding:20px}
+.panel+.panel{margin-top:16px}
+.side{position:sticky;top:16px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mcard{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;display:grid;gap:4px;align-content:start}
+.mcard[aria-pressed="true"]{border:2px solid var(--pink);background:var(--pink-soft);padding:13px}
+.mcard .t{font-weight:700}
+.mcard .pr{font-size:20px;font-weight:300}
+.mcard .s{font-size:13px;color:var(--muted)}
+.mcard ul{margin:6px 0 0;padding-left:16px;font-size:13px;color:var(--muted)}
+.dcards{grid-template-columns:repeat(4,minmax(0,1fr))}
+.est .r{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
+.est .r span:first-child{color:var(--muted)}
+.est .r span:last-child{text-align:right}
+.est .big{font-size:30px;font-weight:300;margin:10px 0 0;font-variant-numeric:tabular-nums}
+.facts{margin:14px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted);display:grid;gap:6px}
+.facts li::before{content:"✓ ";color:var(--ok);font-weight:700}
+
+/* chat widget */
+.fab{position:fixed;right:20px;bottom:20px;z-index:40;display:flex;align-items:center;gap:10px;background:var(--pink);color:#fff;border:0;border-radius:999px;padding:12px 18px 12px 14px;font-weight:700;box-shadow:0 10px 30px rgba(120,30,60,.3);cursor:pointer}
+.chat{position:fixed;right:20px;bottom:20px;z-index:50;width:380px;max-width:calc(100vw - 32px);height:min(620px,calc(100vh - 40px));background:var(--bg);border:1px solid var(--pink-line);border-radius:20px;box-shadow:0 24px 60px rgba(48,54,54,.25);display:none;flex-direction:column;overflow:hidden}
+.chat.open{display:flex}
+.chead{background:var(--ink);color:#fff;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:10px}
+.chead img{height:26px;width:auto;display:block}
+.chead .st{font-size:12px;color:#C9D0D0}
+.chead .x{background:none;border:0;font-size:22px;cursor:pointer;color:#fff;width:32px;height:32px}
+.lang{display:flex;border:1px solid #586060;border-radius:999px;padding:2px}
+.lang button{border:0;background:transparent;color:#C9D0D0;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--pink);color:#fff}
+.log{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:86%;padding:9px 12px;border-radius:16px;font-size:14.5px;line-height:1.5;white-space:pre-line;animation:in .18s ease-out}
+.bot{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.me{background:var(--ink);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.msg b{font-weight:700}
+@keyframes in{from{transform:translateY(4px);opacity:.4}to{transform:none;opacity:1}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start}
+.chip{border:1px solid var(--pink-line);background:var(--card);color:var(--pink-dark);font-size:13px;padding:6px 11px;border-radius:999px;cursor:pointer;text-decoration:none}
+.chip:hover{background:var(--pink);border-color:var(--pink);color:#fff}
+.mini{align-self:stretch;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 10px}
+.mini .it{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.mini .it:first-child{border-top:0}
+.mini .it button{background:var(--pink);color:#fff;border:0;border-radius:8px;width:28px;height:28px;font-weight:700;cursor:pointer}
+.typing{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;display:flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--pink-line);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+form.inp{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--line);background:var(--card)}
+form.inp input{flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:var(--bg);font-size:15px}
+form.inp button{border:0;background:var(--pink);color:#fff;border-radius:999px;padding:0 16px;font-weight:700;cursor:pointer}
+
+/* staff drawer */
+.scrim{position:fixed;inset:0;background:rgba(48,54,54,.35);z-index:60;display:none}
+.scrim.on{display:block}
+.staff{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--card);z-index:70;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.15)}
+.staff.on{transform:none}
+.shead{padding:16px 20px;border-bottom:1px solid var(--line);background:var(--bg2);display:flex;align-items:center;gap:10px}
+.shead h3{margin:0;font-size:20px;font-weight:300}
+.shead .sub{font-size:13px;color:var(--muted)}
+.shead .x{margin-left:auto;background:none;border:0;font-size:24px;cursor:pointer;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.stat{padding:12px 14px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .k{font-size:11.5px;color:var(--muted)}
+.feed{flex:1;overflow-y:auto;padding:16px 20px;display:grid;gap:14px;align-content:start}
+.sempty{color:var(--muted);font-size:14px;border:1px dashed var(--pink-line);border-radius:14px;padding:20px;text-align:center}
+.ticket{font:13px/1.55 var(--mono);background:#FFFDF9;border:1px solid #E8E0D6;border-radius:6px;padding:14px 16px;box-shadow:0 2px 0 #EFE6DA}
+.ticket .hd{display:flex;justify-content:space-between;font-weight:700}
+.ticket hr{border:0;border-top:1px dashed #C9BFB3;margin:8px 0}
+.ticket .r{display:flex;justify-content:space-between;gap:12px}
+.ticket .al{background:var(--warn-bg);color:var(--warn);padding:4px 6px;border-radius:4px;margin-top:6px;font-size:12px}
+.ticket .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-family:var(--font);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.ticket .foot button{border:0;border-radius:6px;padding:6px 10px;cursor:pointer;background:var(--ink);color:#fff;font-size:12px;font-weight:700}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--pink-soft);color:var(--pink-dark)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.mail{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail .mh{background:var(--bg2);padding:10px 14px;font-size:13px;display:grid;gap:2px}
+.mail .mh span{color:var(--muted)}
+.mail .mb{padding:12px 14px;font-size:13.5px;display:grid;grid-template-columns:120px 1fr;gap:4px 12px}
+.mail .mb .k{color:var(--muted)}
+.mail .mb .full{grid-column:1/-1;margin-top:6px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+.hand{border:1px solid var(--line);border-left:4px solid #E0A030;border-radius:10px;padding:10px 14px;font-size:13.5px}
+.hand .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);font-weight:700}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:80;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.toast button{background:none;border:0;color:var(--pink-light);font-weight:700;cursor:pointer;pointer-events:auto;margin-left:8px}
+footer{background:var(--ink);color:#C9D0D0;font-size:13px}
+footer .in{max-width:1200px;margin:0 auto;padding:20px 20px 40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:980px){
+  .order,.groups{grid-template-columns:minmax(0,1fr)}
+  .basket{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:45;border-radius:20px 20px 0 0;max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s ease;box-shadow:0 -20px 50px rgba(0,0,0,.18)}
+  .basket.open{transform:none}
+  .closex{display:block;position:absolute;right:12px;top:10px;background:none;border:0;font-size:24px;color:var(--muted);cursor:pointer}
+  .mbar{position:fixed;left:12px;right:12px;bottom:12px;z-index:44;display:none;align-items:center;justify-content:space-between;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:13px 18px;font-weight:700;cursor:pointer}
+  .mbar.on{display:flex}
+  body.hasbar .fab{bottom:78px}
+  .side{position:static;order:-1}
+  .dcards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .toast{bottom:auto;top:16px}
+  .grid,.cards{grid-template-columns:minmax(0,1fr)}
+  .dcards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wrap{padding:22px 16px 120px}
+  .site .in{padding:12px 16px;gap:10px}
+  .logo img{height:30px}
+  .nav{margin-left:0;gap:4px 14px}
+  .fab span{display:none}
+  .fab{padding:14px}
+  .chat{right:0;bottom:0;width:100vw;max-width:100vw;height:100%;border-radius:0}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .mail .mb{grid-template-columns:1fr}
+  .proto{padding:7px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="proto" role="region" aria-label="Prototype controls">
+  <span>Prototype for Zahida by Sulaman Khan · not live on zahida.dk</span>
+  <div class="ctl">
+    <label for="sim">Demo clock</label>
+    <select id="sim">
+      <option value="live">Live (Copenhagen time)</option>
+      <option value="rush">Friday 18:40 (dinner rush)</option>
+      <option value="late">Saturday 20:45 (near kitchen close)</option>
+      <option value="sun">Sunday 13:00 (closed)</option>
+    </select>
+    <button type="button" id="reset">Reset</button>
+    <button type="button" class="staffbtn" id="staffOpen">Staff view<span class="badge" id="badge" hidden>0</span></button>
+  </div>
+</div>
+
+<header class="site">
+  <div class="in">
+    <a class="logo" href="#" aria-label="Zahida"><img src="https://images.squarespace-cdn.com/content/v1/644588f0f38a4710fa9b3259/faddd1ab-c162-47bd-97d9-9007f07ae803/Zahida_Rectangular-WHITE-01+HIRES.png?format=500w" alt="Zahida" onerror="this.replaceWith(document.createTextNode('ZAHIDA'))"></a>
+    <nav class="nav" aria-label="Main">
+      <button type="button" data-go="takeaway" class="on">Order takeaway</button>
+      <button type="button" data-go="groups">Groups &amp; events</button>
+      <a class="book" href="https://bookings.zenchef.com/results?rid=383488" target="_blank" rel="noopener">Book a table</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="kicker" id="kick">Takeaway · pickup at Rømersgade 20</div>
+  <h1 id="title">Order takeaway online</h1>
+  <p class="lead" id="lead">Order from our à la carte menu and pick it up at Rømersgade 20, usually ready in about 30 minutes. No need to call.</p>
+  <div class="status"><i class="dot" id="sdot"></i><span id="stxt"></span></div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab" role="tab" id="t-takeaway" aria-selected="true" aria-controls="p-takeaway" data-go="takeaway">Takeaway</button>
+    <button type="button" class="tab" role="tab" id="t-groups" aria-selected="false" aria-controls="p-groups" data-go="groups">Groups &amp; events</button>
+  </div>
+
+  <section id="p-takeaway" role="tabpanel" aria-labelledby="t-takeaway">
+    <div class="order">
+      <div>
+        <div class="filters" id="filters"><span>Show only:</span></div>
+        <div class="catnav" id="catnav"></div>
+        <div id="menu"></div>
+        <p class="legend">VE vegan · V vegetarian · G gluten-free · L lactose-free · Some dishes can be made gluten-free, please ask us. All our food is halal.</p>
+      </div>
+      <aside class="basket" id="basket" aria-label="Your order">
+        <button type="button" class="closex" id="bclose" aria-label="Close basket">×</button>
+        <div id="bview"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="p-groups" role="tabpanel" aria-labelledby="t-groups" hidden>
+    <div class="groups">
+      <form id="gform" novalidate>
+        <div class="panel">
+          <h2>1 · The occasion</h2>
+          <div class="segs" id="g-occ"></div>
+          <div class="row2" style="margin-top:4px">
+            <div class="field"><label for="g-guests">Guests (incl. children)</label><input id="g-guests" type="number" min="1" max="120" inputmode="numeric" placeholder="e.g. 14"></div>
+            <div class="field"><label for="g-date">Date</label><input id="g-date" type="date"></div>
+          </div>
+          <div id="g-notes"></div>
+        </div>
+        <div class="panel">
+          <h2>2 · Menu</h2>
+          <p class="lead" style="margin-bottom:12px;font-size:14px">Made for sharing. The whole table chooses the same menu; classic, vegetarian and vegan can be mixed.</p>
+          <div class="cards" id="g-menu">
+            <button type="button" class="mcard" data-v="tasting" aria-pressed="false"><span class="t">Tasting Menu</span><span class="pr">495 kr. <small style="font-size:13px">per person</small></span><span class="s">9 servings · 4 courses</span>
+              <ul><li>Pani Puri · Aloo Chaat</li><li>Kerala Prawns / King Mushrooms</li><li>Masala New York Strip / Masala Celeriac</li><li>Szechuan Wings / Oyster Mushrooms</li><li>Murgh Makhani / Pumpkin &amp; Chana Saag</li><li>Naan · Rice · Lime &amp; Basil Kulfi</li></ul></button>
+            <button type="button" class="mcard" data-v="chef" aria-pressed="false"><span class="t">Chef's Menu</span><span class="pr">400 kr. <small style="font-size:13px">per person</small></span><span class="s">6 servings · 3 courses</span>
+              <ul><li>Pani Puri · Aloo Chaat</li><li>Murgh Makhani</li><li>Garlic &amp; Ginger Naan · Jeera &amp; Haldi Rice</li><li>Lime &amp; Basil Kulfi</li><li>Classic, veggie or vegan</li></ul></button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>3 · Drinks</h2>
+          <p class="lead" style="margin-bottom:12px;font-size:14px">Each pairing is 3 glasses per person, so the price is clear before you arrive.</p>
+          <div class="cards dcards" id="g-drinks">
+            <button type="button" class="mcard" data-v="wine" aria-pressed="false"><span class="t">Wine</span><span class="pr">295 kr.</span><span class="s">3 glasses</span></button>
+            <button type="button" class="mcard" data-v="cocktail" aria-pressed="false"><span class="t">Cocktails</span><span class="pr">295 kr.</span><span class="s">3 glasses</span></button>
+            <button type="button" class="mcard" data-v="na" aria-pressed="false"><span class="t">Non-alcoholic</span><span class="pr">275 kr.</span><span class="s">3 glasses</span></button>
+            <button type="button" class="mcard" data-v="bar" aria-pressed="false"><span class="t">At the bar</span><span class="pr">—</span><span class="s">Order on the night</span></button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>4 · Your details</h2>
+          <div class="field"><label for="g-diet">Dietary needs</label><input id="g-diet" placeholder="e.g. 3 vegetarian, 1 gluten-free"></div>
+          <div class="row2">
+            <div class="field"><label for="g-name">Name</label><input id="g-name" autocomplete="name"></div>
+            <div class="field"><label for="g-phone">Phone</label><input id="g-phone" type="tel" autocomplete="tel"></div>
+          </div>
+          <div class="field"><label for="g-email">Email</label><input id="g-email" type="email" autocomplete="email"></div>
+          <div class="field"><label for="g-msg">Anything else?</label><textarea id="g-msg" placeholder="Speeches, a birthday cake, outdoor seating…"></textarea></div>
+          <div class="err" id="g-err" role="alert"></div>
+          <button class="cta" type="submit">Send request</button>
+        </div>
+      </form>
+      <aside class="side"><div class="panel est" id="est"></div></aside>
+    </div>
+  </section>
+</main>
+
+<footer><div class="in"><span>Zahida · Rømersgade 20, st., 1362 København K · +45 52 24 03 66 · info@zahida.dk</span><span>Non-EU cards, Company Cards and Amex cards may be subject to a surcharge</span></div></footer>
+
+<button type="button" class="mbar" id="mbar"><span id="mbarL"></span><span id="mbarR"></span></button>
+
+<button type="button" class="fab" id="fab" aria-label="Open chat"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>Ask Zahida</span></button>
+<div class="chat" id="chat" role="dialog" aria-label="Zahida assistant">
+  <div class="chead">
+    <div><img src="https://images.squarespace-cdn.com/content/v1/644588f0f38a4710fa9b3259/faddd1ab-c162-47bd-97d9-9007f07ae803/Zahida_Rectangular-WHITE-01+HIRES.png?format=300w" alt="Zahida" onerror="this.replaceWith(document.createTextNode('ZAHIDA'))"><div class="st" id="cst">Assistant · replies instantly</div></div>
+    <div class="lang" role="group" aria-label="Language" style="margin-left:auto"><button type="button" id="l-en" aria-pressed="true">EN</button><button type="button" id="l-da" aria-pressed="false">DA</button></div>
+    <button type="button" class="x" id="cclose" aria-label="Close chat">×</button>
+  </div>
+  <div class="log" id="log" aria-live="polite"></div>
+  <form class="inp" id="cform"><input id="q" autocomplete="off" placeholder="Ask anything…" aria-label="Message"><button type="submit" id="send">Send</button></form>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="staff" id="staff" aria-label="Staff view">
+  <div class="shead"><div><h3>Tonight at Zahida</h3><div class="sub" id="clocktxt"></div></div><button type="button" class="x" id="staffClose" aria-label="Close staff view">×</button></div>
+  <div class="stats">
+    <div class="stat"><div class="v" id="s-orders">0</div><div class="k">Takeaway orders</div></div>
+    <div class="stat"><div class="v" id="s-rev">0 kr.</div><div class="k">Takeaway value</div></div>
+    <div class="stat"><div class="v" id="s-pipe">0 kr.</div><div class="k">Group requests (est.)</div></div>
+    <div class="stat"><div class="v" id="s-q">0</div><div class="k">Chat answers</div></div>
+  </div>
+  <div class="feed" id="feed"><div class="sempty" id="sempty">Orders, group requests and questions the assistant passed on appear here the moment a guest sends them.</div></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===== Data (Zahida Winter Menu 2026) ===== */
+const DISHES=[
+ {id:"wings",c:"app",n:"Szechuan Chicken Wings",d:["szechuan & tamarind sticky glaze","klistret glace af szechuan og tamarind"],p:135,t:["G","L"]},
+ {id:"oyster",c:"app",n:"Szechuan Oyster Mushrooms",d:["szechuan & tamarind sticky glaze","klistret glace af szechuan og tamarind"],p:125,t:["VE","G","L"]},
+ {id:"aloo",c:"app",n:"Aloo Chaat",d:["thousand layer potato, mango reduction, herb mayo","tusindlags-kartoffel, mangoreduktion, urtemayo"],p:115,t:["V","G","L"],cv:1},
+ {id:"pani",c:"app",n:"Pani Puri",d:["chana daal, tamarind water","chana daal, tamarindvand"],p:105,t:["VE","L"]},
+ {id:"prawns",c:"app",n:"Kerala Prawns",d:["curried prawns, coconut sauce","karryrejer, kokossauce"],p:135,t:["G","L"]},
+ {id:"king",c:"app",n:"King Mushrooms",d:["curried mushrooms, coconut sauce","karrysvampe, kokossauce"],p:125,t:["VE","G","L"]},
+ {id:"fries",c:"app",n:"Masala Fries",d:["signature seasoning, parmesan, confit aioli","signaturkrydderi, parmesan, confit-aioli"],p:105,t:["V","G"],cv:1},
+ {id:"makhani",c:"main",n:"Murgh Makhani",d:["signature butter chicken","vores signatur butter chicken"],p:245,t:[]},
+ {id:"saag",c:"main",n:"Pumpkin & Chana Saag",d:["pumpkin, chickpeas, spinach","græskar, kikærter, spinat"],p:245,t:["VE","L"]},
+ {id:"strip",c:"main",n:"Masala New York Strip",d:["sauce vierge, dressed salad","sauce vierge, salat"],p:350,t:["G","L"]},
+ {id:"celeriac",c:"main",n:"Masala Celeriac",d:["sauce vierge, dressed salad","sauce vierge, salat"],p:245,t:["V","G","L"],cv:1},
+ {id:"papad",c:"side",n:"Papadums",d:["tomato chutney","tomatchutney"],p:45,t:["VE","G","L"]},
+ {id:"gnaan",c:"side",n:"Garlic & Ginger Naan",d:["garlic-ginger butter flatbread","fladbrød med hvidløgs-ingefærsmør"],p:45,t:["V"]},
+ {id:"naan",c:"side",n:"Naan",d:["flatbread","fladbrød"],p:45,t:["VE","L"]},
+ {id:"rice",c:"side",n:"Jeera & Haldi Rice",d:["cumin, turmeric, basmati rice","spidskommen, gurkemeje, basmatiris"],p:45,t:["VE","G","L"]},
+ {id:"kulfi",c:"dess",n:"Lime & Basil Kulfi",d:["lime-basil sorbet","lime-basilikum-sorbet"],p:85,t:["VE","G","L"]}
+];
+const D=Object.fromEntries(DISHES.map(x=>[x.id,x]));
+const CATS=[["app","Appetizers"],["main","Mains · all mains served with sides"],["side","Sides"],["dess","Desserts"]];
+const FILTERS=[["VE","Vegan"],["V","Vegetarian"],["G","Gluten-free"],["L","Lactose-free"]];
+const ALIAS=[["makhani",/makhani|butter ?chicken|smørkylling/],["wings",/wing|vinger/],["oyster",/oyster|østers/],["aloo",/aloo|chaat/],["pani",/pani|puri/],["prawns",/prawn|kerala|rejer|shrimp/],["king",/king ?mushroom|kongesvamp/],["fries",/fries|pommes/],["strip",/strip|steak|bøf|beef|oksekød/],["saag",/pumpkin|græskar|saag/],["celeriac",/celeriac|selleri/],["papad",/papad/],["gnaan",/garlic|hvidløg/],["naan",/\bnaan\b/],["rice",/\brice\b|\bris\b/],["kulfi",/kulfi|sorbet|dessert/]];
+const BOOK_URL="https://bookings.zenchef.com/results?rid=383488";
+const MENU_P={tasting:495,chef:400}, PAIR={wine:295,cocktail:295,na:275,bar:0};
+const MENU_N={tasting:"Tasting Menu (495 kr.)",chef:"Chef's Menu (400 kr.)"};
+const DRINK_N={wine:"Wine pairing (295 kr.)",cocktail:"Cocktail pairing (295 kr.)",na:"Non-alcoholic pairing (275 kr.)",bar:"Order at the bar"};
+const OCC=[["birthday","Birthday"],["xmas","Julefrokost"],["company","Company dinner"],["wedding","Wedding"],["other","Other"]];
+
+/* ===== State ===== */
+let cart={}, filters=new Set(), people="1–2", allergy="none", slot=null, orderNo=1042, lang="en", placed=null;
+const stats={orders:0,rev:0,pipe:0,q:0}; let unseen=0;
+const g={occ:null,menu:null,drinks:null};
+const $=id=>document.getElementById(id);
+const kr=n=>n.toLocaleString("da-DK")+" kr.";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tx=(en,da)=>lang==="da"?da:en;
+
+/* ===== Clock & rules (Copenhagen) ===== */
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],WDL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WDda=["søn","man","tir","ons","tor","fre","lør"],MOda=["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
+function now(){
+  const m=$("sim").value;
+  if(m==="rush")return{date:new Date(Date.UTC(2026,9,9)),min:18*60+40};
+  if(m==="late")return{date:new Date(Date.UTC(2026,9,10)),min:20*60+45};
+  if(m==="sun")return{date:new Date(Date.UTC(2026,9,11)),min:13*60};
+  const p=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Copenhagen",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+  return{date:new Date(Date.UTC(+p.year,+p.month-1,+p.day)),min:(+p.hour)*60+(+p.minute)};
+}
+const addDays=(d,n)=>new Date(d.getTime()+n*864e5);
+const isOpen=dow=>dow>=2&&dow<=6;
+const closeMin=dow=>dow===5||dow===6?22*60+30:22*60;
+const KITCHEN=21*60, FIRST=17*60+30;
+const hm=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+function dLabel(off,date){if(off===0)return tx("Today","I dag");if(off===1)return tx("Tomorrow","I morgen");return lang==="da"?`${WDda[date.getUTCDay()]} ${date.getUTCDate()}. ${MOda[date.getUTCMonth()]}`:`${WD[date.getUTCDay()]} ${date.getUTCDate()} ${MO[date.getUTCMonth()]}`}
+function pickupDays(minOff,count){
+  const n=now(),out=[];
+  for(let off=minOff;off<=12&&out.length<count;off++){
+    const date=addDays(n.date,off),dow=date.getUTCDay();if(!isOpen(dow))continue;
+    let start=FIRST;if(off===0)start=Math.max(start,Math.ceil((n.min+30)/15)*15);
+    if(start>KITCHEN)continue;
+    const slots=[];for(let m=start;m<=KITCHEN;m+=15)slots.push(m);
+    out.push({off,date,slots});
+  }
+  return out;
+}
+function statusLine(){
+  const n=now(),dow=n.date.getUTCDay(),first=pickupDays(0,1)[0],open=isOpen(dow)&&n.min<KITCHEN;
+  $("sdot").className="dot"+(open?"":" off");
+  const lbl=dLabel(first.off,first.date);
+  if(!isOpen(dow))return`Closed Sunday and Monday · pre-order now for ${lbl} from ${hm(first.slots[0])}`;
+  if(first.off===0)return n.min<17*60?`We open at 17:00 · earliest pickup today ${hm(first.slots[0])}`:`Kitchen open until 21:00 · earliest pickup ${hm(first.slots[0])}`;
+  return`Kitchen closed for tonight · pre-order for ${lbl} from ${hm(first.slots[0])}`;
+}
+function refreshClock(){
+  const n=now(),dow=n.date.getUTCDay();
+  $("stxt").textContent=statusLine();
+  $("clocktxt").textContent=`${WDL[dow]} ${n.date.getUTCDate()} ${MO[n.date.getUTCMonth()]}, ${hm(n.min)} in Copenhagen`;
+  slot=null;renderBasket();$("g-date").min=n.date.toISOString().slice(0,10);
+}
+
+/* ===== Tabs ===== */
+function go(t){
+  const tk=t==="takeaway";
+  $("p-takeaway").hidden=!tk;$("p-groups").hidden=tk;
+  $("t-takeaway").setAttribute("aria-selected",tk);$("t-groups").setAttribute("aria-selected",!tk);
+  document.querySelectorAll(".nav [data-go]").forEach(b=>b.classList.toggle("on",b.dataset.go===t));
+  $("kick").textContent=tk?"Takeaway · pickup at Rømersgade 20":"Groups & events · up to 55 guests";
+  $("title").textContent=tk?"Order takeaway online":"Groups & events";
+  $("lead").textContent=tk?"Order from our à la carte menu and pick it up at Rømersgade 20, usually ready in about 30 minutes. No need to call.":"Birthdays, julefrokost, company dinners and weddings. Up to 55 guests inside (plus 20 outdoors in summer), or the whole restaurant for 40–50. Tell us the details and see an estimate right away.";
+  updBar();
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+
+/* ===== Menu ===== */
+function tagsHTML(d){return d.t.map(x=>`<span class="tg ${x}" title="${({VE:"Vegan",V:"Vegetarian",G:"Gluten-free",L:"Lactose-free"})[x]}">${x}</span>`).join("")+(d.cv?`<span class="tg cv">can be vegan</span>`:"")}
+function matches(d){for(const f of filters){if(f==="V"){if(!(d.t.includes("V")||d.t.includes("VE")||d.cv))return false}else if(f==="VE"){if(!(d.t.includes("VE")||d.cv))return false}else if(!d.t.includes(f))return false}return true}
+function renderFilters(){
+  const box=$("filters");box.querySelectorAll("button").forEach(b=>b.remove());
+  FILTERS.forEach(([k,l])=>{const b=document.createElement("button");b.type="button";b.className="fchip";b.textContent=l;b.setAttribute("aria-pressed",filters.has(k));b.onclick=()=>{filters.has(k)?filters.delete(k):filters.add(k);renderFilters();renderMenu()};box.append(b)});
+}
+function renderMenu(){
+  $("catnav").innerHTML=CATS.map(([c,l])=>`<a href="#cat-${c}">${l.split(" ·")[0]}</a>`).join("");
+  $("menu").innerHTML=CATS.map(([c,l])=>{
+    const items=DISHES.filter(d=>d.c===c&&matches(d));
+    return`<div class="cat" id="cat-${c}"><h2>${l}</h2>${items.length?`<div class="grid">${items.map(d=>`<div class="dish"><div class="n">${esc(d.n)}</div><div class="p">${d.p} kr.</div><div class="d">${esc(d.d[0])}</div><div class="act" data-id="${d.id}"></div><div class="tags">${tagsHTML(d)}</div></div>`).join("")}</div>`:`<div class="empty-filter">No dishes here match the filter.</div>`}</div>`}).join("");
+  document.querySelectorAll(".act").forEach(renderAct);
+}
+function renderAct(a){
+  const id=a.dataset.id,n=cart[id]||0;
+  a.innerHTML=n?`<span class="step"><button type="button" aria-label="Remove one ${esc(D[id].n)}">−</button><span>${n}</span><button type="button" aria-label="Add one ${esc(D[id].n)}">+</button></span>`:`<button type="button" class="addbtn" aria-label="Add ${esc(D[id].n)}">Add</button>`;
+  const bs=a.querySelectorAll("button");
+  if(!n)bs[0].onclick=()=>add(id);else{bs[0].onclick=()=>remove(id);bs[1].onclick=()=>add(id,true)}
+}
+const refreshActs=()=>document.querySelectorAll(".act").forEach(renderAct);
+
+/* ===== Basket ===== */
+const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+const total=()=>Object.entries(cart).reduce((s,[k,n])=>s+D[k].p*n,0);
+function add(id,silent){placed=null;cart[id]=(cart[id]||0)+1;refreshActs();renderBasket();if(!silent)toast(`Added ${D[id].n}`)}
+function remove(id){cart[id]--;if(cart[id]<=0)delete cart[id];refreshActs();renderBasket()}
+const form={name:"",phone:""};
+function renderBasket(){
+  const v=$("bview");
+  if(placed){v.innerHTML=placed;$("again").onclick=()=>{placed=null;renderBasket()};updBar();return}
+  const lines=Object.entries(cart),days=people==="7+"?pickupDays(1,4):pickupDays(0,4);
+  if(!slot||!days.some(d=>d.off===slot.off&&d.slots.includes(slot.m)))slot={off:days[0].off,m:days[0].slots[0]};
+  const day=days.find(d=>d.off===slot.off),aw=allergyWarn(),closedToday=!isOpen(now().date.getUTCDay());
+  v.innerHTML=`<h3>Your order</h3><p class="sub">Pickup at Rømersgade 20 · pay when you collect</p>
+   ${lines.length?lines.map(([k,n])=>`<div class="bl"><span>${esc(D[k].n)}</span><span class="q"><button type="button" data-r="${k}" aria-label="Remove one ${esc(D[k].n)}">−</button>${n}<button type="button" data-a="${k}" aria-label="Add one ${esc(D[k].n)}">+</button></span><span class="amt">${kr(D[k].p*n)}</span></div>`).join("")+`<div class="total"><span>Total</span><span>${kr(total())}</span></div>`:`<div class="bempty">Your basket is empty. Add dishes from the menu, or ask our chat assistant.</div>`}
+   <div class="field"><span class="flabel">How many people?</span><div class="segs" id="ppl">${["1–2","3–4","5–6","7+"].map(p=>`<button type="button" class="seg" aria-pressed="${p===people}">${p}</button>`).join("")}</div></div>
+   ${people==="7+"?`<div class="note warn">For orders for 7 or more people, the kitchen needs your order the day before. Earliest pickup: ${dLabel(days[0].off,days[0].date)}.</div>`:""}
+   ${days[0].off>0&&people!=="7+"?`<div class="note info">${closedToday?"We're closed on Sundays and Mondays.":"The kitchen is closed for tonight."} You can pre-order for ${dLabel(days[0].off,days[0].date)}.</div>`:""}
+   <div class="row2"><div class="field"><label for="pday">Pickup day</label><select id="pday">${days.map(d=>`<option value="${d.off}" ${d.off===slot.off?"selected":""}>${dLabel(d.off,d.date)}</option>`).join("")}</select></div>
+   <div class="field"><label for="ptime">Time</label><select id="ptime">${day.slots.map(m=>`<option value="${m}" ${m===slot.m?"selected":""}>${hm(m)}</option>`).join("")}</select></div></div>
+   <div class="field"><span class="flabel">Allergies</span><div class="segs" id="alg">${[["none","None"],["G","Gluten"],["L","Lactose"],["N","Nuts"]].map(([k,l])=>`<button type="button" class="seg" data-k="${k}" aria-pressed="${k===allergy}">${l}</button>`).join("")}</div></div>
+   ${aw?`<div class="note ${aw.cls}">${aw.html}</div>`:""}
+   <div class="row2"><div class="field"><label for="oname">Name</label><input id="oname" autocomplete="name" value="${esc(form.name)}"></div>
+   <div class="field"><label for="ophone">Phone</label><input id="ophone" type="tel" autocomplete="tel" value="${esc(form.phone)}"></div></div>
+   <div class="err" id="oerr" role="alert"></div>
+   <button type="button" class="cta" id="place" ${lines.length?"":"disabled"}>Place order${lines.length?" · "+kr(total()):""}</button>`;
+  v.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>remove(b.dataset.r));
+  v.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>add(b.dataset.a,true));
+  v.querySelectorAll("#ppl .seg").forEach(b=>b.onclick=()=>{people=b.textContent;renderBasket()});
+  v.querySelectorAll("#alg .seg").forEach(b=>b.onclick=()=>{allergy=b.dataset.k;renderBasket()});
+  $("pday").onchange=e=>{const d=days.find(x=>x.off===+e.target.value);slot={off:d.off,m:d.slots[0]};renderBasket()};
+  $("ptime").onchange=e=>{slot.m=+e.target.value};
+  $("oname").oninput=e=>form.name=e.target.value;$("ophone").oninput=e=>form.phone=e.target.value;
+  $("place").onclick=placeOrder;
+  updBar();
+}
+function allergyWarn(){
+  if(allergy==="none"||!count())return null;
+  if(allergy==="N")return{cls:"warn",html:"Nuts aren't listed on our menu, so the kitchen will confirm before cooking.",ticket:"NUT ALLERGY: kitchen to confirm"};
+  const bad=Object.keys(cart).filter(k=>!D[k].t.includes(allergy)).map(k=>D[k].n),w=allergy==="G"?"gluten-free":"lactose-free",A=allergy==="G"?"GLUTEN":"LACTOSE";
+  if(!bad.length)return{cls:"ok",html:`Everything in your order is marked ${w}. We've added a note for the kitchen.`,ticket:`${A} allergy (all items marked ${allergy})`};
+  return{cls:"warn",html:`<b>${esc(bad.join(", "))}</b> ${bad.length>1?"aren't":"isn't"} marked ${w}. Some dishes can be adapted, so the kitchen will confirm before cooking.`,ticket:`${A}: confirm ${bad.join(", ")}`};
+}
+function placeOrder(){
+  const name=form.name.trim(),phone=form.phone.trim();
+  if(!name||phone.replace(/\D/g,"").length<8){$("oerr").textContent="Please add your name and phone number, so we can text you when it's ready.";return}
+  const days=people==="7+"?pickupDays(1,4):pickupDays(0,4),d=days.find(x=>x.off===slot.off);
+  const when=`${dLabel(d.off,d.date)} ${hm(slot.m)}`,no=orderNo++,rows=Object.entries(cart).map(([k,n])=>[`${n}× ${D[k].n}`,kr(D[k].p*n)]),tot=total(),aw=allergyWarn();
+  addTicket({no,rows,tot,when,name,phone,people,allergy:aw&&aw.ticket});
+  stats.orders++;stats.rev+=tot;renderStats();
+  placed=`<div class="done"><div class="kicker">Order #${no} received</div><div class="big">Pickup ${esc(when)}</div><p class="sub">Thank you, ${esc(name)}! The kitchen has your order. We'll text ${esc(phone)} when it's accepted and when it's ready.</p>${rows.map(r=>`<div class="bl" style="grid-template-columns:1fr auto"><span>${esc(r[0])}</span><span class="amt">${r[1]}</span></div>`).join("")}<div class="total"><span>Total · pay at pickup</span><span>${kr(tot)}</span></div><button type="button" class="ghost" id="again">Start a new order</button></div>`;
+  cart={};allergy="none";people="1–2";form.name="";form.phone="";refreshActs();renderBasket();
+  toast("Order sent to the kitchen",true);
+}
+function updBar(){
+  const n=count(),onT=!$("p-takeaway").hidden,show=onT&&(n>0||placed)&&!$("basket").classList.contains("open");
+  $("mbar").classList.toggle("on",!!show);document.body.classList.toggle("hasbar",!!show);
+  $("mbarL").textContent=placed&&!n?"Order placed ✓":`View order · ${n} item${n===1?"":"s"}`;$("mbarR").textContent=n?kr(total()):"";
+}
+$("mbar").onclick=()=>{$("basket").classList.add("open");updBar()};
+$("bclose").onclick=()=>{$("basket").classList.remove("open");updBar()};
+
+/* ===== Groups ===== */
+$("g-occ").innerHTML=OCC.map(([k,l])=>`<button type="button" class="seg" data-k="${k}" aria-pressed="false">${l}</button>`).join("");
+$("g-occ").querySelectorAll(".seg").forEach(b=>b.onclick=()=>{g.occ=b.dataset.k;syncGroup()});
+document.querySelectorAll("#g-menu .mcard").forEach(b=>b.onclick=()=>{g.menu=b.dataset.v;syncGroup()});
+document.querySelectorAll("#g-drinks .mcard").forEach(b=>b.onclick=()=>{g.drinks=b.dataset.v;syncGroup()});
+["g-guests","g-date"].forEach(id=>$(id).oninput=syncGroup);
+const guestsN=()=>parseInt($("g-guests").value)||0;
+function syncGroup(){
+  $("g-occ").querySelectorAll(".seg").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===g.occ));
+  document.querySelectorAll("#g-menu .mcard").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===g.menu));
+  document.querySelectorAll("#g-drinks .mcard").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===g.drinks));
+  const n=guestsN(),notes=[],dv=$("g-date").value;
+  if(dv&&!isOpen(new Date(dv+"T12:00:00Z").getUTCDay()))notes.push(["warn","We're normally closed on Sundays and Mondays. For a full buyout we may be able to open, so we'll note it on your request."]);
+  if(n&&n<8)notes.push(["info",`For ${n} guests you can book a table directly. <a href="${BOOK_URL}" target="_blank" rel="noopener">Book a table</a>, or continue here for a set menu.`]);
+  if(n>=40||g.occ==="wedding")notes.push(["info","You can book the whole restaurant for 40–50 guests, and we're happy to arrange a viewing first."]);
+  if(n>75)notes.push(["warn","That's more than we can seat (55 inside, plus 20 outdoors in summer). We'll look at options with you."]);
+  $("g-notes").innerHTML=notes.map(([c,h])=>`<div class="note ${c}">${h}</div>`).join("");
+  renderEstimate();
+}
+function fmtISO(dv){const d=new Date(dv+"T12:00:00Z");return`${WD[d.getUTCDay()]} ${d.getUTCDate()} ${MO[d.getUTCMonth()]}`}
+function renderEstimate(){
+  const n=guestsN(),per=(g.menu?MENU_P[g.menu]:0)+(g.drinks?PAIR[g.drinks]:0),occ=OCC.find(o=>o[0]===g.occ),dv=$("g-date").value;
+  $("est").innerHTML=`<h2>Your estimate</h2>
+   <div class="r"><span>Occasion</span><span>${occ?occ[1]:"—"}</span></div>
+   <div class="r"><span>Guests</span><span>${n||"—"}</span></div>
+   <div class="r"><span>Date</span><span>${dv?fmtISO(dv):"—"}</span></div>
+   <div class="r"><span>Menu</span><span>${g.menu?MENU_N[g.menu]:"—"}</span></div>
+   <div class="r"><span>Drinks</span><span>${g.drinks?DRINK_N[g.drinks]:"—"}</span></div>
+   <div class="big">${n&&g.menu?kr(n*per):"— kr."}</div>
+   <div style="font-size:13px;color:var(--muted)">${n&&g.menu?`${n} × ${per} kr. per person · estimate, we confirm the final offer`:"Choose guests and a menu to see an estimate"}</div>
+   <ul class="facts"><li>All food is halal</li><li>Classic, vegetarian and vegan can be mixed</li><li>One spice level: “Scandinavian spicy”</li><li>Split bill: max. 2 payments unless agreed in advance</li><li>Kids welcome; no strollers inside (fire regulations)</li></ul>`;
+}
+$("gform").onsubmit=e=>{
+  e.preventDefault();const n=guestsN(),name=$("g-name").value.trim(),email=$("g-email").value.trim(),phone=$("g-phone").value.trim(),dv=$("g-date").value;
+  const miss=[];if(!g.occ)miss.push("occasion");if(!n)miss.push("number of guests");if(!dv)miss.push("date");if(!g.menu)miss.push("menu");if(!g.drinks)miss.push("drinks");if(!name)miss.push("name");if(!email&&!phone)miss.push("email or phone");
+  if(miss.length){$("g-err").textContent="Please add: "+miss.join(", ")+".";return}
+  $("g-err").textContent="";
+  const per=MENU_P[g.menu]+PAIR[g.drinks],est=n*per,dl=fmtISO(dv),occ=OCC.find(o=>o[0]===g.occ)[1],to=g.occ==="wedding"||n>=40?"info@zahida.dk":"groupbooking@zahida.dk";
+  addMail({to,occ,n,dl,menu:MENU_N[g.menu],drinks:DRINK_N[g.drinks],diet:$("g-diet").value.trim()||"None",name,contact:[email,phone].filter(Boolean).join(" · "),msg:$("g-msg").value.trim(),per,est});
+  stats.pipe+=est;renderStats();
+  $("est").innerHTML=`<div class="kicker">Request sent ✓</div><div style="font-size:24px;font-weight:300;margin:6px 0">${esc(occ)} · ${n} guests · ${dl}</div><p style="font-size:14px;color:var(--muted)">Thank you, ${esc(name)}. Your request is with the Zahida team, who will confirm the date and send your final offer. Estimate: <b style="color:var(--ink)">${kr(est)}</b>.</p><button type="button" class="ghost" id="gnew">New request</button>`;
+  $("gnew").onclick=resetGroup;toast("Request sent to "+to,true);$("est").scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+function resetGroup(){g.occ=g.menu=g.drinks=null;$("gform").reset();$("g-err").textContent="";syncGroup()}
+
+/* ===== Staff view ===== */
+function openStaff(){$("staff").classList.add("on");$("scrim").classList.add("on");unseen=0;$("badge").hidden=true}
+function closeStaff(){$("staff").classList.remove("on");$("scrim").classList.remove("on")}
+$("staffOpen").onclick=openStaff;$("staffClose").onclick=closeStaff;$("scrim").onclick=closeStaff;
+function bump(){unseen++;$("badge").textContent=unseen;$("badge").hidden=false;const e=$("sempty");if(e)e.remove()}
+function renderStats(){$("s-orders").textContent=stats.orders;$("s-rev").textContent=kr(stats.rev);$("s-pipe").textContent=kr(stats.pipe);$("s-q").textContent=stats.q}
+function addTicket(o){
+  bump();const t=document.createElement("div");t.className="ticket";
+  t.innerHTML=`<div class="hd"><span>ZAHIDA · TAKEAWAY</span><span>#${o.no}</span></div><div>Pickup: <b>${esc(o.when)}</b></div><div>${esc(o.name)} · ${esc(o.phone)} · ${esc(o.people)} ppl</div><hr>`+
+   o.rows.map(r=>`<div class="r"><span>${esc(r[0])}</span><span>${r[1]}</span></div>`).join("")+`<hr><div class="r"><b>TOTAL</b><b>${kr(o.tot)}</b></div><div>Payment: at pickup</div>`+
+   (o.allergy?`<div class="al">⚠ ${esc(o.allergy)}</div>`:"")+`<div class="foot"><span>Sent by SMS + email · printer optional</span><span class="pill" data-st>New</span><button type="button">Accept</button></div>`;
+  const b=t.querySelector("button"),p=t.querySelector("[data-st]");
+  b.onclick=()=>{if(b.dataset.s){p.textContent="Ready · guest notified";b.remove();return}b.dataset.s="1";p.textContent="Accepted · SMS sent to guest";p.className="pill ok";b.textContent="Mark ready"};
+  $("feed").prepend(t);
+}
+function addMail(o){
+  bump();const m=document.createElement("div");m.className="mail";
+  const rows=[["Occasion",o.occ],["Guests",o.n],["Date",o.dl],["Menu",o.menu],["Drinks",o.drinks],["Dietary",o.diet],["Guest",o.name],["Contact",o.contact]].concat(o.msg?[["Message",o.msg]]:[]).concat([["Estimate",`${kr(o.est)} (${o.n} × ${o.per} kr.)`]]);
+  m.innerHTML=`<div class="mh"><div><span>To:</span> ${o.to}</div><div><span>Subject:</span> <b>${esc(o.occ)} · ${o.n} guests · ${esc(o.dl)}</b> <span class="pill">New lead</span></div></div><div class="mb">${rows.map(r=>`<div class="k">${r[0]}</div><div>${esc(r[1])}</div>`).join("")}<div class="full">Guest has already seen: whole table picks one menu; classic / vegetarian / vegan can mix; pairing = 3 glasses per person; split bill max. 2 payments; the estimate is not a confirmed offer.</div></div>`;
+  $("feed").prepend(m);
+}
+function addHandoff(q){bump();const h=document.createElement("div");h.className="hand";h.innerHTML=`<div class="k">Chat question passed to staff · not guessed</div><div>“${esc(q)}”</div>`;$("feed").prepend(h)}
+let tt;function toast(msg,staff){const t=$("toast");t.innerHTML=esc(msg)+(staff?`<button type="button" id="tsv">Staff view</button>`:"");t.classList.add("on");if(staff)$("tsv").onclick=openStaff;clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),staff?4500:1800)}
+
+/* ===== Chat assistant (scripted for the prototype) ===== */
+const log=$("log");let queue=Promise.resolve();const fast=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rich=s=>esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+const scroll=()=>log.scrollTop=log.scrollHeight;
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function me(t){log.append(el("div","msg me",t));scroll()}
+function bot(content,after){queue=queue.then(()=>new Promise(res=>{const ty=el("div","typing");ty.innerHTML="<i></i><i></i><i></i>";log.append(ty);scroll();setTimeout(()=>{ty.remove();if(content!=null){if(typeof content==="string"){const b=el("div","msg bot");b.innerHTML=rich(content);log.append(b)}else{const n=content();if(n)log.append(n)}}if(after)after();scroll();res()},fast?0:450)}))}
+const clearChips=()=>log.querySelectorAll(".chips").forEach(c=>c.remove());
+function chips(list,fn){clearChips();const c=el("div","chips");list.forEach(o=>{if(o.href){const a=el("a","chip",o.l);a.href=o.href;a.target="_blank";a.rel="noopener";c.append(a);return}const b=el("button","chip",o.l);b.type="button";b.onclick=()=>{c.remove();me(o.l);fn(o.v)};c.append(b)});log.append(c);scroll()}
+const answered=()=>{stats.q++;renderStats()};
+const home=()=>[{l:tx("Order takeaway","Bestil takeaway"),v:"@order"},{l:tx("Plan a group or event","Planlæg et selskab"),v:"@group"},{l:tx("Book a table","Book bord"),v:"@table"},{l:tx("Gluten-free dishes","Glutenfri retter"),v:"@gluten"},{l:tx("Is the food halal?","Er maden halal?"),v:"@halal"},{l:tx("Opening hours","Åbningstider"),v:"@hours"}];
+const more=()=>bot(null,()=>chips(home(),route));
+function miniMenu(ids){const m=el("div","mini");ids.forEach(id=>{const d=D[id],r=el("div","it");r.innerHTML=`<span>${esc(d.n)} ${d.t.map(x=>`<span class="tg ${x}">${x}</span>`).join(" ")}</span><span>${d.p} kr.</span>`;const b=el("button",null,"+");b.type="button";b.setAttribute("aria-label",tx("Add ","Tilføj ")+d.n);b.onclick=()=>chatAdd(id);r.append(b);m.append(r)});return m}
+const basketTxt=()=>tx(`Basket: ${count()} item${count()>1?"s":""} · ${kr(total())}`,`Kurv: ${count()} ${count()>1?"varer":"vare"} · ${kr(total())}`);
+function chatAdd(id){add(id,true);bot(tx(`Added **${D[id].n}** to your order. `,`**${D[id].n}** er lagt i kurven. `)+basketTxt(),()=>chips([{l:tx("Go to checkout","Gå til kassen"),v:"@checkout"},{l:tx("See full menu","Se hele menuen"),v:"@fullmenu"},{l:tx("Something else","Noget andet"),v:"@home"}],route))}
+function route(v){
+  const r={"@order":chatOrder,"@group":()=>chatGroup({}),"@table":tableAns,"@gluten":()=>{answered();bot(listAlg("G"),more)},"@halal":()=>{answered();bot(halalT(),more)},"@hours":()=>{answered();bot(hoursT(),more)},"@home":()=>chips(home(),route),
+    "@checkout":()=>{go("takeaway");if(innerWidth<=640)closeChat();if(innerWidth<=980){$("basket").classList.add("open");updBar()}else $("basket").scrollIntoView({behavior:"smooth",block:"start"});bot(tx("Your basket is open. Choose a pickup time, add your name and phone, and place the order.","Din kurv er åben. Vælg afhentningstid, skriv navn og telefon, og afgiv bestillingen."))},
+    "@fullmenu":()=>{go("takeaway");if(innerWidth<=640)closeChat();$("menu").scrollIntoView({behavior:"smooth"})}};
+  if(r[v])return r[v]();
+  if(v.startsWith("@add:"))return chatAdd(v.slice(5));
+  answer(v);
+}
+function chatOrder(){
+  const f=pickupDays(0,1)[0];
+  bot(tx(`Of course. Takeaway is pickup at Rømersgade 20, earliest **${dLabel(f.off,f.date).toLowerCase()} at ${hm(f.slots[0])}**. Here are guest favourites; tap + to add, or just tell me what you'd like.`,`Selvfølgelig. Takeaway afhentes på Rømersgade 20, tidligst **${dLabel(f.off,f.date).toLowerCase()} kl. ${hm(f.slots[0])}**. Her er gæsternes favoritter; tryk + eller skriv, hvad du vil have.`));
+  bot(()=>miniMenu(["makhani","wings","saag","strip","gnaan","rice"]),()=>chips([{l:tx("See full menu","Se hele menuen"),v:"@fullmenu"}],route));
+}
+function chatGroup(pre){
+  go("groups");if(pre.occ)g.occ=pre.occ;if(pre.guests)$("g-guests").value=pre.guests;syncGroup();
+  const occL=pre.occ?OCC.find(o=>o[0]===pre.occ)[1]:null,bits=[occL,pre.guests?pre.guests+tx(" guests"," gæster"):null].filter(Boolean).join(", ");
+  answered();
+  bot(tx(`We'd love to host you! I've opened our group form${bits?` and filled in: ${bits}`:""}. Choose a date, menu and drinks and you'll see an estimate straight away.\n**Tasting Menu** 495 kr. · 9 servings\n**Chef's Menu** 400 kr. · 6 servings\nPairings are 3 glasses per person: wine or cocktails 295, non-alcoholic 275.`,`Vi vil meget gerne have jer! Jeg har åbnet vores gruppeformular${bits?` og udfyldt: ${bits}`:""}. Vælg dato, menu og drikkevarer, så ser du et overslag med det samme.\n**Tasting Menu** 495 kr. · 9 serveringer\n**Chef's Menu** 400 kr. · 6 serveringer\nDrikkemenuer er 3 glas pr. person: vin eller cocktails 295, alkoholfri 275.`),more);
+}
+function tableAns(){answered();bot(tx("Tables are booked through our online booking, which shows live availability and confirms instantly. For 8 or more guests, use our group form so we can plan the menu with you.","Borde bookes via vores online booking, som viser ledige borde live og bekræfter med det samme. Er I 8 eller flere, så brug vores gruppeformular, så vi kan planlægge menuen sammen."),()=>chips([{l:tx("Book a table ↗","Book bord ↗"),href:BOOK_URL},{l:tx("We're 8 or more","Vi er 8 eller flere"),v:"@group"}],route))}
+const halalT=()=>tx("Yes, all our food is halal. We also serve wine, cocktails and craft beer from BRØL, plus non-alcoholic cocktails.","Ja, al vores mad er halal. Vi serverer også vin, cocktails og øl fra BRØL samt alkoholfri cocktails.");
+function hoursT(){const n=now(),dow=n.date.getUTCDay();return(isOpen(dow)?tx(`Today we're open 17:00–${hm(closeMin(dow))}, and the kitchen is open until 21:00.`,`I dag har vi åbent 17:00–${hm(closeMin(dow))}, og køkkenet har åbent til 21:00.`):tx("We're closed today.","Vi har lukket i dag."))+"\n"+tx("Tue–Thu 17:00–22:00 · Fri–Sat 17:00–22:30 · Sun–Mon closed.","Tir–tor 17:00–22:00 · fre–lør 17:00–22:30 · søn–man lukket.")}
+const ALG={G:[/gluten|cøliaki|coeliac|celiac|wheat|hvede/,["gluten-free","glutenfri"]],L:[/lactose|laktose|dairy|mælk|milk/,["lactose-free","laktosefri"]],VE:[/vegan/,["vegan","vegansk"]],V:[/vegetar|veggie/,["vegetarian","vegetarisk"]]};
+const hasA=(d,a)=>d.t.includes(a)||(a==="V"&&d.t.includes("VE"));
+const cap=w=>w[0].toUpperCase()+w.slice(1);
+function listAlg(a){const w=tx(...ALG[a][1]),ok=DISHES.filter(d=>hasA(d,a)).map(d=>d.n);let s=tx(`Marked ${w} on our menu: **${ok.join(", ")}**.`,`Markeret ${w} på menukortet: **${ok.join(", ")}**.`);if(a==="VE")s+=tx(`\nCan be made vegan: ${DISHES.filter(d=>d.cv).map(d=>d.n).join(", ")}.`,`\nKan laves vegansk: ${DISHES.filter(d=>d.cv).map(d=>d.n).join(", ")}.`);if(a==="G")s+=tx("\nSome other dishes can be made gluten-free, just ask us.","\nNogle andre retter kan laves glutenfri, spørg os bare.");return s}
+function dishAlg(ids,a){const w=tx(...ALG[a][1]);return ids.map(id=>{const d=D[id];if(hasA(d,a))return tx(`Yes, **${d.n}** is ${w}.`,`Ja, **${d.n}** er ${w}.`);if(a==="VE"&&d.cv)return tx(`**${d.n}** can be made vegan, just add a note.`,`**${d.n}** kan laves vegansk, skriv det bare i en note.`);const alt=DISHES.filter(x=>x.c===d.c&&x.id!==id&&hasA(x,a)).map(x=>x.n);return tx(`**${d.n}** isn't marked ${w} on our menu. Some dishes can be adapted, so the kitchen will confirm. I won't guess on allergies.`,`**${d.n}** er ikke markeret ${w} på menukortet. Nogle retter kan tilpasses, så køkkenet bekræfter. Jeg gætter ikke på allergier.`)+(alt.length?tx(`\n${cap(w)} instead: ${alt.join(", ")}.`,`\n${cap(w)} i stedet: ${alt.join(", ")}.`):"")}).join("\n\n")}
+const NUMW={one:1,two:2,three:3,four:4,five:5,en:1,et:1,to:2,tre:3,fire:4,fem:5};
+function qtyFor(s,id){const re=ALIAS.find(a=>a[0]===id)[1],m=s.match(re);if(!m)return 1;const pre=s.slice(Math.max(0,m.index-16),m.index);const q=pre.match(/(\d+|one|two|three|four|five|en|et|to|tre|fire|fem)\s*x?\s*(?:[a-zæøå&]+\s+)?$/);if(!q)return 1;const n=/\d/.test(q[1])?parseInt(q[1]):NUMW[q[1]];return Math.min(Math.max(n||1,1),20)}
+function findDishes(s){const o=[];ALIAS.forEach(([id,re])=>{if(re.test(s))o.push(id)});if(o.includes("gnaan"))return o.filter(x=>x!=="naan");if(/mushroom|svamp/.test(s)&&!o.includes("king")&&!o.includes("oyster"))o.push("king","oyster");return o}
+function detectLang(t){const s=" "+t.toLowerCase()+" ";if(/[æøå]|\b(hej|jeg|vi|er|kan|hvad|hvor|hvornår|bord|til|har|tak|bestille|glutenfri|personer|gerne|med|uden|nogen|må|jeres|hvordan)\b/.test(s))return"da";if(/\b(the|is|are|can|do|we|you|what|how|when|where|have|please|order|table|hi|hello|food|any|it|want|and|i'?d|like|with|some)\b/.test(s))return"en";return null}
+function setLang(l){lang=l;$("l-en").setAttribute("aria-pressed",l==="en");$("l-da").setAttribute("aria-pressed",l==="da");$("q").placeholder=tx("Ask anything…","Spørg om hvad som helst…");$("cst").textContent=tx("Assistant · replies instantly","Assistent · svarer med det samme")}
+function parseOcc(s){if(/birthday|fødselsdag|bday/.test(s))return"birthday";if(/julefrokost|christmas|jule/.test(s))return"xmas";if(/wedding|bryllup/.test(s))return"wedding";if(/company|firma|corporate|kolleg/.test(s))return"company";return null}
+
+function answer(raw){
+  const s=raw.toLowerCase().trim(),dl=detectLang(raw);if(dl&&dl!==lang)setLang(dl);
+  if(/^(hi|hello|hey|hej|goddag|halløj)\b/.test(s))return bot(tx("Hi! How can I help?","Hej! Hvad kan jeg hjælpe med?"),()=>chips(home(),route));
+  if(/checkout|check out|kassen|place (the |my )?order/.test(s))return route("@checkout");
+  const num=parseInt(s.match(/\b(\d{1,3})\b/)?.[1]);
+  const grp=/group|gruppe|birthday|fødselsdag|wedding|bryllup|julefrokost|christmas|company|firma|corporate|event|selskab|party|\bfest\b|buyout|leje hele/.test(s),tbl=/table|\bbord|book|reserv/.test(s);
+  if(grp||(tbl&&num>=8)||(/we are|we're|vi er/.test(s)&&num>=8))return chatGroup({occ:parseOcc(s),guests:num>=2?num:null});
+  const dishes=findDishes(s),aKey=Object.keys(ALG).find(k=>ALG[k][0].test(s)),nut=/\bnut|nød|peanut|jordnød|cashew|mandel|almond/.test(s);
+  if(nut){answered();addHandoff(raw);return bot(tx("Nuts aren't listed on our menu, so I won't guess. I've asked the kitchen to confirm, or you can call us on +45 52 24 03 66 from 17:00.","Nødder er ikke angivet på menukortet, så jeg gætter ikke. Jeg har bedt køkkenet bekræfte, eller ring til os på +45 52 24 03 66 fra kl. 17."),more)}
+  if(dishes.length&&aKey){answered();return bot(dishAlg(dishes,aKey),()=>chips([...dishes.slice(0,2).map(id=>({l:tx("Add ","Tilføj ")+D[id].n,v:"@add:"+id})),{l:tx("Something else","Noget andet"),v:"@home"}],route))}
+  if(/deliver|levering|levere|wolt|just ?eat/.test(s)){answered();return bot(tx("We don't deliver, but takeaway is easy: pickup at Rømersgade 20, usually ready in about 30 minutes, and you can order right here.","Vi leverer ikke, men takeaway er nemt: afhentning på Rømersgade 20, normalt klar på ca. 30 minutter, og du kan bestille lige her."),()=>chips([{l:tx("Order takeaway","Bestil takeaway"),v:"@order"}],route))}
+  if(dishes.length&&/\b(add|i'?ll have|i want|i'?d like|give me|tilføj|jeg vil have|gerne have|\d+ ?x)\b|take ?away|order|bestil/.test(s)){const added=dishes.map(id=>{const q=qtyFor(s,id);for(let i=0;i<q;i++)add(id,true);return(q>1?q+"× ":"")+D[id].n});answered();return bot(tx(`Added **${added.join(", ")}**. `,`Tilføjet: **${added.join(", ")}**. `)+basketTxt(),()=>chips([{l:tx("Go to checkout","Gå til kassen"),v:"@checkout"},{l:tx("Add more","Tilføj mere"),v:"@order"}],route))}
+  if(/take ?away|takeout|to go|\border\b|bestil|afhent|pick ?up|ud af huset/.test(s))return chatOrder();
+  if(tbl)return tableAns();
+  if(/spic|\bhot\b|chili|stærk|mild/.test(s)){answered();return bot(tx("All our dishes come in one spice level, which we call **“Scandinavian spicy”**. Unfortunately we can't adjust the spice level per dish.","Alle vores retter har samme styrke, som vi kalder **“skandinavisk stærk”**. Vi kan desværre ikke justere styrken pr. ret."),more)}
+  if(dishes.length&&/price|cost|how much|pris|koste/.test(s)){answered();return bot(dishes.map(id=>`**${D[id].n}**: ${D[id].p} kr.`).join("\n"),more)}
+  if(aKey){answered();return bot(listAlg(aKey),more)}
+  if(/halal|pork|svin/.test(s)){answered();return bot(halalT(),more)}
+  if(/kid|child|baby|barn|børn|stroller|pram|barnevogn|klapvogn|high ?chair|babystol/.test(s)){answered();return bot(tx("Children are very welcome! Please include children and babies in the number of guests when you book, and add a note if you need a baby chair. Strollers can't come inside because of fire regulations.","Børn er meget velkomne! Tæl børn og babyer med i antallet, når du booker, og skriv en note, hvis I skal bruge en babystol. Barnevogne må ikke komme indenfor på grund af brandregler."),more)}
+  if(/split|dele|separate|hver for sig/.test(s)){answered();return bot(tx("We can split the bill into a maximum of 2 payments, unless agreed in advance.","Vi kan dele regningen i maks. 2 betalinger, medmindre andet er aftalt på forhånd."),more)}
+  if(/mix|blande|combine|kombinere/.test(s)){answered();return bot(tx("Yes: classic, vegetarian and vegan menus can be mixed at the same table. The whole table chooses the same menu size (Tasting Menu or Chef's Menu).","Ja: klassisk, vegetarisk og vegansk kan blandes ved samme bord. Hele bordet vælger samme menu (Tasting Menu eller Chef's Menu)."),more)}
+  if(/cocktail|wine|\bvin\b|beer|\bøl\b|drink|drik|\bbar\b|alcohol|alkohol/.test(s)){answered();return bot(tx("Our signature cocktails are **135 kr.**: Tamarind & Margarita, Chai & Old Fashioned, Hibiscus Highball and more. Non-alcoholic cocktails are **100 kr.**, like Mango Sunrise and the Blessed G&T (0.0% gin). We also serve beer from BRØL. With a set menu you can add a pairing of 3 glasses: wine 295, cocktails 295 or non-alcoholic 275 kr. per person.","Vores signaturcocktails koster **135 kr.**: Tamarind & Margarita, Chai & Old Fashioned, Hibiscus Highball m.fl. Alkoholfri cocktails koster **100 kr.**, f.eks. Mango Sunrise og Blessed G&T (0,0% gin). Vi serverer også øl fra BRØL. Til en fast menu kan I tilføje 3 glas: vin 295, cocktails 295 eller alkoholfri 275 kr. pr. person."),more)}
+  if(/tasting|smagsmenu|chef'?s menu|set menu/.test(s)){answered();return bot(tx("For dinner: the **Tasting Menu** at 495 kr. (9 servings, 4 courses) or the **Chef's Menu** at 400 kr. (6 servings, 3 courses). Both come classic, vegetarian or vegan, and are for the whole table.","Til middag: **Tasting Menu** til 495 kr. (9 serveringer, 4 retter) eller **Chef's Menu** til 400 kr. (6 serveringer, 3 retter). Begge fås klassisk, vegetarisk eller vegansk og er for hele bordet."),()=>chips([{l:tx("Book a table","Book bord"),v:"@table"},{l:tx("Plan a group","Planlæg et selskab"),v:"@group"}],route))}
+  if(/menu|menukort|\bdish|\bret(ter)?\b|food|\bmad\b|eat|spise/.test(s))return chatOrder();
+  if(/open|hour|åben|åbent|åbning|close|luk|when|hvornår/.test(s)){answered();return bot(hoursT(),more)}
+  if(/where|address|adresse|hvor|park|metro|nørreport|find you/.test(s)){answered();return bot(tx("You'll find us at Rømersgade 20, 1362 København K, right next to Torvehallerne and Nørreport Station. You can park under Israels Plads.","Du finder os på Rømersgade 20, 1362 København K, lige ved Torvehallerne og Nørreport Station. Du kan parkere under Israels Plads."),more)}
+  if(/amex|card|kort|surcharge|gebyr|pay|betal/.test(s)){answered();return bot(tx("Takeaway is paid at pickup. Non-EU cards, company cards and Amex cards may be subject to a surcharge.","Takeaway betales ved afhentning. Ikke-EU-kort, firmakort og Amex-kort kan blive pålagt et gebyr."),more)}
+  if(dishes.length){answered();const d=D[dishes[0]];return bot(`**${d.n}**${d.t.length?" ("+d.t.join(", ")+")":""}: ${d.d[lang==="da"?1:0]}. ${d.p} kr.`,()=>chips([{l:tx("Add to order","Læg i kurven"),v:"@add:"+d.id},{l:tx("Something else","Noget andet"),v:"@home"}],route))}
+  addHandoff(raw);
+  bot(tx("I'm not sure about that, and I'd rather not guess. I've passed your question to the Zahida team. You can also call us on +45 52 24 03 66 from 17:00.","Det er jeg ikke sikker på, og jeg vil ikke gætte. Jeg har givet dit spørgsmål videre til Zahida-teamet. Du kan også ringe til os på +45 52 24 03 66 fra kl. 17."),more);
+}
+function startChat(l){queue=Promise.resolve();setLang(l);log.innerHTML="";bot(tx("Hi! Can I help you with anything regarding Zahida? Ask me about the menu, allergens or opening hours, add dishes to a takeaway order, or plan a group dinner.","Hej! Kan jeg hjælpe med noget om Zahida? Spørg om menuen, allergener eller åbningstider, læg retter i en takeaway-bestilling, eller planlæg en gruppemiddag."),()=>chips(home(),route))}
+let started=false;
+function openChat(){$("chat").classList.add("open");$("fab").style.display="none";if(!started){started=true;startChat("en")}if(innerWidth>640)setTimeout(()=>$("q").focus(),50)}
+function closeChat(){$("chat").classList.remove("open");$("fab").style.display=""}
+$("fab").onclick=openChat;$("cclose").onclick=closeChat;
+$("l-en").onclick=()=>startChat("en");$("l-da").onclick=()=>startChat("da");
+$("cform").onsubmit=e=>{e.preventDefault();const v=$("q").value.trim();if(!v)return;$("q").value="";clearChips();me(v);answer(v)};
+
+/* ===== Init ===== */
+$("sim").onchange=refreshClock;
+$("reset").onclick=()=>{cart={};placed=null;filters.clear();people="1–2";allergy="none";form.name=form.phone="";Object.assign(stats,{orders:0,rev:0,pipe:0,q:0});renderStats();$("feed").innerHTML='<div class="sempty" id="sempty">Cleared. New orders and requests will appear here.</div>';unseen=0;$("badge").hidden=true;resetGroup();renderFilters();renderMenu();renderBasket();started=false;closeChat();closeStaff();$("basket").classList.remove("open");go("takeaway");scrollTo(0,0)};
+renderFilters();renderMenu();refreshClock();syncGroup();
+setInterval(()=>{if($("sim").value==="live")$("stxt").textContent=statusLine()},30000);
+</script>
+</body>
+</html>
