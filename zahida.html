@@ -256,7 +256,7 @@ footer .in{max-width:1200px;margin:0 auto;padding:20px 20px 40px;display:flex;ju
     <nav class="nav" aria-label="Main">
       <button type="button" data-go="takeaway" class="on">Order takeaway</button>
       <button type="button" data-go="groups">Groups &amp; events</button>
-      <a class="book" href="https://bookings.zenchef.com/results?rid=383488" target="_blank" rel="noopener">Book a table</a>
+      <a class="book" href="https://www.zahida.dk/en/indian-restaurant-copenhagen" target="_blank" rel="noopener">Book a table</a>
     </nav>
   </div>
 </header>
@@ -345,8 +345,7 @@ footer .in{max-width:1200px;margin:0 auto;padding:20px 20px 40px;display:flex;ju
 <div class="chat" id="chat" role="dialog" aria-label="Zahida assistant">
   <div class="chead">
     <div><img src="https://images.squarespace-cdn.com/content/v1/644588f0f38a4710fa9b3259/faddd1ab-c162-47bd-97d9-9007f07ae803/Zahida_Rectangular-WHITE-01+HIRES.png?format=300w" alt="Zahida" onerror="this.replaceWith(document.createTextNode('ZAHIDA'))"><div class="st" id="cst">Assistant · replies instantly</div></div>
-    <div class="lang" role="group" aria-label="Language" style="margin-left:auto"><button type="button" id="l-en" aria-pressed="true">EN</button><button type="button" id="l-da" aria-pressed="false">DA</button></div>
-    <button type="button" class="x" id="cclose" aria-label="Close chat">×</button>
+    <button type="button" class="x" id="cclose" aria-label="Close chat" style="margin-left:auto">×</button>
   </div>
   <div class="log" id="log" aria-live="polite"></div>
   <form class="inp" id="cform"><input id="q" autocomplete="off" placeholder="Ask anything…" aria-label="Message"><button type="submit" id="send">Send</button></form>
@@ -389,7 +388,7 @@ const D=Object.fromEntries(DISHES.map(x=>[x.id,x]));
 const CATS=[["app","Appetizers"],["main","Mains · all mains served with sides"],["side","Sides"],["dess","Desserts"]];
 const FILTERS=[["VE","Vegan"],["V","Vegetarian"],["G","Gluten-free"],["L","Lactose-free"]];
 const ALIAS=[["makhani",/makhani|butter ?chicken|smørkylling/],["wings",/wing|vinger/],["oyster",/oyster|østers/],["aloo",/aloo|chaat/],["pani",/pani|puri/],["prawns",/prawn|kerala|rejer|shrimp/],["king",/king ?mushroom|kongesvamp/],["fries",/fries|pommes/],["strip",/strip|steak|bøf|beef|oksekød/],["saag",/pumpkin|græskar|saag/],["celeriac",/celeriac|selleri/],["papad",/papad/],["gnaan",/garlic|hvidløg/],["naan",/\bnaan\b/],["rice",/\brice\b|\bris\b/],["kulfi",/kulfi|sorbet|dessert/]];
-const BOOK_URL="https://bookings.zenchef.com/results?rid=383488";
+const BOOK_URL="https://www.zahida.dk/en/indian-restaurant-copenhagen";
 const MENU_P={tasting:495,chef:400}, PAIR={wine:295,cocktail:295,na:275,bar:0};
 const MENU_N={tasting:"Tasting Menu (495 kr.)",chef:"Chef's Menu (400 kr.)"};
 const DRINK_N={wine:"Wine pairing (295 kr.)",cocktail:"Cocktail pairing (295 kr.)",na:"Non-alcoholic pairing (275 kr.)",bar:"Order at the bar"};
@@ -491,14 +490,12 @@ const form={name:"",phone:""};
 function renderBasket(){
   const v=$("bview");
   if(placed){v.innerHTML=placed;$("again").onclick=()=>{placed=null;renderBasket()};updBar();return}
-  const lines=Object.entries(cart),days=people==="7+"?pickupDays(1,4):pickupDays(0,4);
+  const lines=Object.entries(cart),days=pickupDays(0,4);
   if(!slot||!days.some(d=>d.off===slot.off&&d.slots.includes(slot.m)))slot={off:days[0].off,m:days[0].slots[0]};
   const day=days.find(d=>d.off===slot.off),aw=allergyWarn(),closedToday=!isOpen(now().date.getUTCDay());
   v.innerHTML=`<h3>Your order</h3><p class="sub">Pickup at Rømersgade 20 · pay when you collect</p>
    ${lines.length?lines.map(([k,n])=>`<div class="bl"><span>${esc(D[k].n)}</span><span class="q"><button type="button" data-r="${k}" aria-label="Remove one ${esc(D[k].n)}">−</button>${n}<button type="button" data-a="${k}" aria-label="Add one ${esc(D[k].n)}">+</button></span><span class="amt">${kr(D[k].p*n)}</span></div>`).join("")+`<div class="total"><span>Total</span><span>${kr(total())}</span></div>`:`<div class="bempty">Your basket is empty. Add dishes from the menu, or ask our chat assistant.</div>`}
-   <div class="field"><span class="flabel">How many people?</span><div class="segs" id="ppl">${["1–2","3–4","5–6","7+"].map(p=>`<button type="button" class="seg" aria-pressed="${p===people}">${p}</button>`).join("")}</div></div>
-   ${people==="7+"?`<div class="note warn">For orders for 7 or more people, the kitchen needs your order the day before. Earliest pickup: ${dLabel(days[0].off,days[0].date)}.</div>`:""}
-   ${days[0].off>0&&people!=="7+"?`<div class="note info">${closedToday?"We're closed on Sundays and Mondays.":"The kitchen is closed for tonight."} You can pre-order for ${dLabel(days[0].off,days[0].date)}.</div>`:""}
+   ${days[0].off>0?`<div class="note info">${closedToday?"We're closed on Sundays and Mondays.":"The kitchen is closed for tonight."} You can pre-order for ${dLabel(days[0].off,days[0].date)}.</div>`:""}
    <div class="row2"><div class="field"><label for="pday">Pickup day</label><select id="pday">${days.map(d=>`<option value="${d.off}" ${d.off===slot.off?"selected":""}>${dLabel(d.off,d.date)}</option>`).join("")}</select></div>
    <div class="field"><label for="ptime">Time</label><select id="ptime">${day.slots.map(m=>`<option value="${m}" ${m===slot.m?"selected":""}>${hm(m)}</option>`).join("")}</select></div></div>
    <div class="field"><span class="flabel">Allergies</span><div class="segs" id="alg">${[["none","None"],["G","Gluten"],["L","Lactose"],["N","Nuts"]].map(([k,l])=>`<button type="button" class="seg" data-k="${k}" aria-pressed="${k===allergy}">${l}</button>`).join("")}</div></div>
@@ -509,7 +506,6 @@ function renderBasket(){
    <button type="button" class="cta" id="place" ${lines.length?"":"disabled"}>Place order${lines.length?" · "+kr(total()):""}</button>`;
   v.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>remove(b.dataset.r));
   v.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>add(b.dataset.a,true));
-  v.querySelectorAll("#ppl .seg").forEach(b=>b.onclick=()=>{people=b.textContent;renderBasket()});
   v.querySelectorAll("#alg .seg").forEach(b=>b.onclick=()=>{allergy=b.dataset.k;renderBasket()});
   $("pday").onchange=e=>{const d=days.find(x=>x.off===+e.target.value);slot={off:d.off,m:d.slots[0]};renderBasket()};
   $("ptime").onchange=e=>{slot.m=+e.target.value};
@@ -527,7 +523,7 @@ function allergyWarn(){
 function placeOrder(){
   const name=form.name.trim(),phone=form.phone.trim();
   if(!name||phone.replace(/\D/g,"").length<8){$("oerr").textContent="Please add your name and phone number, so we can text you when it's ready.";return}
-  const days=people==="7+"?pickupDays(1,4):pickupDays(0,4),d=days.find(x=>x.off===slot.off);
+  const days=pickupDays(0,4),d=days.find(x=>x.off===slot.off);
   const when=`${dLabel(d.off,d.date)} ${hm(slot.m)}`,no=orderNo++,rows=Object.entries(cart).map(([k,n])=>[`${n}× ${D[k].n}`,kr(D[k].p*n)]),tot=total(),aw=allergyWarn();
   addTicket({no,rows,tot,when,name,phone,people,allergy:aw&&aw.ticket});
   stats.orders++;stats.rev+=tot;renderStats();
@@ -596,7 +592,7 @@ function bump(){unseen++;$("badge").textContent=unseen;$("badge").hidden=false;c
 function renderStats(){$("s-orders").textContent=stats.orders;$("s-rev").textContent=kr(stats.rev);$("s-pipe").textContent=kr(stats.pipe);$("s-q").textContent=stats.q}
 function addTicket(o){
   bump();const t=document.createElement("div");t.className="ticket";
-  t.innerHTML=`<div class="hd"><span>ZAHIDA · TAKEAWAY</span><span>#${o.no}</span></div><div>Pickup: <b>${esc(o.when)}</b></div><div>${esc(o.name)} · ${esc(o.phone)} · ${esc(o.people)} ppl</div><hr>`+
+  t.innerHTML=`<div class="hd"><span>ZAHIDA · TAKEAWAY</span><span>#${o.no}</span></div><div>Pickup: <b>${esc(o.when)}</b></div><div>${esc(o.name)} · ${esc(o.phone)}</div><hr>`+
    o.rows.map(r=>`<div class="r"><span>${esc(r[0])}</span><span>${r[1]}</span></div>`).join("")+`<hr><div class="r"><b>TOTAL</b><b>${kr(o.tot)}</b></div><div>Payment: at pickup</div>`+
    (o.allergy?`<div class="al">⚠ ${esc(o.allergy)}</div>`:"")+`<div class="foot"><span>Sent by SMS + email · printer optional</span><span class="pill" data-st>New</span><button type="button">Accept</button></div>`;
   const b=t.querySelector("button"),p=t.querySelector("[data-st]");
@@ -658,11 +654,11 @@ const NUMW={one:1,two:2,three:3,four:4,five:5,en:1,et:1,to:2,tre:3,fire:4,fem:5}
 function qtyFor(s,id){const re=ALIAS.find(a=>a[0]===id)[1],m=s.match(re);if(!m)return 1;const pre=s.slice(Math.max(0,m.index-16),m.index);const q=pre.match(/(\d+|one|two|three|four|five|en|et|to|tre|fire|fem)\s*x?\s*(?:[a-zæøå&]+\s+)?$/);if(!q)return 1;const n=/\d/.test(q[1])?parseInt(q[1]):NUMW[q[1]];return Math.min(Math.max(n||1,1),20)}
 function findDishes(s){const o=[];ALIAS.forEach(([id,re])=>{if(re.test(s))o.push(id)});if(o.includes("gnaan"))return o.filter(x=>x!=="naan");if(/mushroom|svamp/.test(s)&&!o.includes("king")&&!o.includes("oyster"))o.push("king","oyster");return o}
 function detectLang(t){const s=" "+t.toLowerCase()+" ";if(/[æøå]|\b(hej|jeg|vi|er|kan|hvad|hvor|hvornår|bord|til|har|tak|bestille|glutenfri|personer|gerne|med|uden|nogen|må|jeres|hvordan)\b/.test(s))return"da";if(/\b(the|is|are|can|do|we|you|what|how|when|where|have|please|order|table|hi|hello|food|any|it|want|and|i'?d|like|with|some)\b/.test(s))return"en";return null}
-function setLang(l){lang=l;$("l-en").setAttribute("aria-pressed",l==="en");$("l-da").setAttribute("aria-pressed",l==="da");$("q").placeholder=tx("Ask anything…","Spørg om hvad som helst…");$("cst").textContent=tx("Assistant · replies instantly","Assistent · svarer med det samme")}
+function setLang(l){lang="en";$("q").placeholder=tx("Ask anything…","Spørg om hvad som helst…");$("cst").textContent=tx("Assistant · replies instantly","Assistent · svarer med det samme")}
 function parseOcc(s){if(/birthday|fødselsdag|bday/.test(s))return"birthday";if(/julefrokost|christmas|jule/.test(s))return"xmas";if(/wedding|bryllup/.test(s))return"wedding";if(/company|firma|corporate|kolleg/.test(s))return"company";return null}
 
 function answer(raw){
-  const s=raw.toLowerCase().trim(),dl=detectLang(raw);if(dl&&dl!==lang)setLang(dl);
+  const s=raw.toLowerCase().trim();
   if(/^(hi|hello|hey|hej|goddag|halløj)\b/.test(s))return bot(tx("Hi! How can I help?","Hej! Hvad kan jeg hjælpe med?"),()=>chips(home(),route));
   if(/checkout|check out|kassen|place (the |my )?order/.test(s))return route("@checkout");
   const num=parseInt(s.match(/\b(\d{1,3})\b/)?.[1]);
@@ -697,7 +693,6 @@ let started=false;
 function openChat(){$("chat").classList.add("open");$("fab").style.display="none";if(!started){started=true;startChat("en")}if(innerWidth>640)setTimeout(()=>$("q").focus(),50)}
 function closeChat(){$("chat").classList.remove("open");$("fab").style.display=""}
 $("fab").onclick=openChat;$("cclose").onclick=closeChat;
-$("l-en").onclick=()=>startChat("en");$("l-da").onclick=()=>startChat("da");
 $("cform").onsubmit=e=>{e.preventDefault();const v=$("q").value.trim();if(!v)return;$("q").value="";clearChips();me(v);answer(v)};
 
 /* ===== Init ===== */
